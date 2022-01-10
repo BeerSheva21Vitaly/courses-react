@@ -2,7 +2,9 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { fontSize } from '@mui/system';
 import React, {FC, ReactNode} from 'react';
 import {BrowserRouter, Routes, Route, Navigate} from 'react-router-dom';
+import NavigatorDrawer from './components/common/navigator-drawer';
 import NavigatorMobile from './components/common/navigator-mobile';
+import NavigatorResponsive from './components/common/navigator-responsive';
 import NavigatorWeb from './components/common/navigator-web';
 import {PATH_COURSES, routes} from './config/routes-сonfig';
 
@@ -27,7 +29,9 @@ const App: FC = () => {
    {/* Конфигурация раутинга  */}
       <BrowserRouter>
         {/* <NavigatorWeb > */}
-        <NavigatorMobile items={routes} />
+        {/* <NavigatorDrawer items={routes} /> */}
+        {/* <NavigatorMobile items={routes} /> */}
+        <NavigatorResponsive items={routes} />
         <Routes>
           {getRoutes()}
           {/* Редирект с главной страницы приложения на страницу курсов */}

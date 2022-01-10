@@ -1,7 +1,7 @@
-import {AppBar, Box, Button, CssBaseline, Divider, Drawer, IconButton, List, ListItem, ListItemIcon, ListItemText, Toolbar, Typography, useTheme } from '@mui/material';
+import React from 'react';
+import {AppBar, Box, CssBaseline, Divider, Drawer, IconButton, List, ListItem, ListItemIcon, ListItemText, Toolbar, Typography } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
-import React from 'react';
 import { RouteType } from '../../models/common/route-type';
 import { Link, useLocation } from 'react-router-dom';
 const drawerWidth = 240;
@@ -55,12 +55,12 @@ const NavigatorMobile: React.FC<{items: RouteType[]}> = (props) => {
         </AppBar>
         <Drawer
             sx={{
-            width: drawerWidth,
-            flexShrink: 0,
-            '& .MuiDrawer-paper': {
                 width: drawerWidth,
-                boxSizing: 'border-box',
-            },
+                flexShrink: 0,
+                '& .MuiDrawer-paper': {
+                    width: drawerWidth,
+                    boxSizing: 'border-box',
+                },
             }}
             anchor="left"
             open={open}
