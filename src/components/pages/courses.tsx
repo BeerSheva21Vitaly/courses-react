@@ -1,8 +1,14 @@
-import { Typography } from "@mui/material";
-import React from "react";
+import { Typography, Box, Button } from "@mui/material";
+import React, { useContext } from "react";
+import CoursesContext from "../../store/context";
 
 const Courses: React.FC = () => {
-    return <Typography>Courses works</Typography>
+    const storeValue = useContext(CoursesContext);
+
+    return <Box>
+            <Typography variant="h2">Courses works {storeValue.count}</Typography>
+            <Button variant="outlined" onClick={storeValue.decrease}>Decrease count</Button>
+        </Box>
 }
 
 export default Courses;
