@@ -4,8 +4,8 @@ import React, {FC, ReactNode, useContext, useState} from 'react';
 import {BrowserRouter, Routes, Route, Navigate} from 'react-router-dom';
 import NavigatorResponsive from './components/common/navigator-responsive';
 import {PATH_COURSES, routes} from './config/routes-сonfig';
-import { StoreType } from './models/store-type';
-import CoursesContext, {defaultValue} from './store/context';
+import { Colledge } from './models/colledge-type';
+import { ColledgeContext, defaultColledge, addRandomCourse } from './store/context';
 
 // настройка кастомных стилей элементов matreial ui делается через theme
 // 1. создаем объекты "тема по умолчанию"
@@ -23,28 +23,31 @@ const theme = createTheme();
 const App: FC = () => {
   
   //хук, который будет обрабатывать изменения ресурса типа StoreValue, который хранит глобальный контекст
-  const [storeValueState, setStore] = React.useState<StoreType>(defaultValue);
- 
-  //определяем способы изменения состояния ресурса и сохраняем их в поля ресурса
-  storeValueState.increase = increaseCount;
-  storeValueState.decrease = decreaseCount;
+  const [storeCoursesState, setStore] = React.useState<Colledge>(defaultColledge);
+
+  storeCoursesState.addCourse = addCourse;
+  storeCoursesState.removeCourse = removeCourse
   
-  function increaseCount() {
-    storeValueState.count++;
-    //с помощью деструктуризации создаем новый объект с новой ссылкой - копию старого объекта. Иначе рендеринга не будет
-    setStore({...storeValueState});
+  function addCourse() {
+    addRandomCourse(storeCoursesState.courses);
+    setStore({...storeCoursesState});
   }
 
-  function decreaseCount() {
-    storeValueState.count--;
-    //с помощью деструктуризации создаем новый объект с новой ссылкой - копию старого объекта. Иначе рендеринга не будет
-    setStore({...storeValueState});
+  function removeCourse(courseId: number) {
+    const courseIndex = storeCoursesState.courses.findIndex(c => c.id === courseId);
+    if(courseIndex >= 0) {
+      storeCoursesState.courses.splice(courseIndex, 1);
+      setStore({...storeCoursesState});
+    } else {
+      throw `Course with id ${courseId} can't be removed from Colledge because there is no course with this id`
+    }
   }
+  
 
   function getRoutes(): ReactNode[] {
     return routes.map(r => <Route path={r.path} element={r.element} key={r.path}/>)
   }
-  return <CoursesContext.Provider value={storeValueState}>
+  return <ColledgeContext.Provider value={storeCoursesState}>
     {/* Контекст провайдер - компонент, который обеспечивает объект глобального контекста */}
       <ThemeProvider theme={theme} >
     {/* Конфигурация раутинга  */}
@@ -57,7 +60,7 @@ const App: FC = () => {
           </Routes>
         </BrowserRouter>
       </ThemeProvider>
-    </CoursesContext.Provider> 
+    </ColledgeContext.Provider> 
 }
 
 export default App;

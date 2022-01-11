@@ -1,14 +1,41 @@
-import { Typography, Box, Button } from "@mui/material";
+import { Typography, Box, Button, List, ListItem, IconButton, ListItemText } from "@mui/material";
 import React, { useContext } from "react";
-import CoursesContext from "../../store/context";
+import {ColledgeContext} from "../../store/context";
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const Courses: React.FC = () => {
-    const storeValue = useContext(CoursesContext);
+    const storeValue = useContext(ColledgeContext);
+
+    function getListItems(): React.ReactNode[] {
+        const items: React.ReactNode[] = [];
+         storeValue.courses.map(course => {          
+                items.push(
+                    <ListItem
+                    secondaryAction={
+                        <IconButton edge="end" aria-label="delete" 
+                            onClick={() => !!storeValue.removeCourse && storeValue.removeCourse(course.id)}>
+                        <DeleteIcon />
+                        </IconButton>
+                    }
+                    >
+                    <ListItemText
+                        primary= {JSON.stringify(course)}
+                    />
+                    </ListItem>
+                )
+        })
+        return items;
+    }
 
     return <Box>
-            <Typography variant="h2">Courses works {storeValue.count}</Typography>
-            <Button variant="outlined" onClick={storeValue.decrease}>Decrease count</Button>
+            {/* <Typography variant="h2">Courses works {storeValue.count}</Typography>
+            <Button variant="outlined" onClick={storeValue.decrease}>Decrease count</Button> */}
+            <List>
+                {getListItems()}
+            </List>
         </Box>
 }
 
 export default Courses;
+
+
