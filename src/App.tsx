@@ -5,7 +5,8 @@ import {BrowserRouter, Routes, Route, Navigate} from 'react-router-dom';
 import NavigatorResponsive from './components/common/navigator-responsive';
 import {PATH_COURSES, routes} from './config/routes-сonfig';
 import { Colledge } from './models/colledge-type';
-import { ColledgeContext, defaultColledge, addRandomCourse } from './store/context';
+import { ColledgeContext, initialColledge} from './store/context';
+import { addRandomCourse } from './util/courses-util';
 
 // настройка кастомных стилей элементов matreial ui делается через theme
 // 1. создаем объекты "тема по умолчанию"
@@ -23,7 +24,7 @@ const theme = createTheme();
 const App: FC = () => {
   
   //хук, который будет обрабатывать изменения ресурса типа StoreValue, который хранит глобальный контекст
-  const [storeCoursesState, setStore] = React.useState<Colledge>(defaultColledge);
+  const [storeCoursesState, setStore] = React.useState<Colledge>(initialColledge);
 
   storeCoursesState.addCourse = addCourse;
   storeCoursesState.removeCourse = removeCourse

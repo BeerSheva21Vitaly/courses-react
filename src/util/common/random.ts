@@ -1,20 +1,19 @@
-import { isArray } from "lodash";
 
-export function getRandomInteger(min, max) {
+export function getRandomInteger(min: number, max: number) {
     if (min > max) {
         [min, max] = [max, min];
     }
     return Math.round(Math.random() * (max - min) + min);
 }
-export function getRandomElement(array) {
+export function getRandomElement(array: string[]) {
     if (!Array.isArray(array) || array.length === 0) {
         throw Error();
     }
     return array[getRandomInteger(0, array.length - 1)];
 }
-export function getRandomDate(minYear, maxYear) {
-    let date1 = `01-01-${minYear}`;
-    let date2 = `12-31-${maxYear}`;
+export function getRandomDate(minYear: number, maxYear: number) {
+    let date1: any = `01-01-${minYear}`;
+    let date2: any = `12-31-${maxYear}`;
     date1 = new Date(date1).getTime();
     date2 = new Date(date2).getTime();
     if (date1 > date2) {
