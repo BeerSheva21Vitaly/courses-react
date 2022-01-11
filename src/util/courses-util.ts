@@ -20,7 +20,7 @@ export function addRandomCourse(courses: Course[]) {
     }
 }
 
-function getRandomCourse(): Course {
+export function getRandomCourse(): Course {
     const { minCost, maxCost, minHours, maxHours, minYear, maxYear, courseNames, lecturers, types, timing } = { ...courseData };
     const course = createCourse(courseNames, lecturers, minHours, maxHours, minCost, maxCost, types, timing, minYear, maxYear);
     return course;
