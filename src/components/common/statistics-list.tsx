@@ -10,7 +10,7 @@ function getListItems(): React.ReactNode[] {
     let items: React.ReactNode[] = [];
     props.statistics.map(line => {          
                 items.push(
-                    <ListItem>
+                    <ListItem sx={{display:"flex"}}>
                         <ListItemText
                             primary= {JSON.stringify(line)}
                         />

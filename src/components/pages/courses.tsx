@@ -10,13 +10,14 @@ const Courses: React.FC = () => {
         const items: React.ReactNode[] = [];
          storeValue.courses.map(course => {          
                 items.push(
-                    <ListItem
-                    secondaryAction={
-                        <IconButton edge="end" aria-label="delete" 
-                            onClick={() => !!storeValue.removeCourse && storeValue.removeCourse(course.id)}>
-                        <DeleteIcon />
-                        </IconButton>
-                    }
+                    <ListItem key={course.id}
+                        secondaryAction={
+                            <IconButton edge="end" aria-label="delete" 
+                                // onClick={() => !!storeValue.removeCourse && storeValue.removeCourse(course.id)}>
+                                onClick={storeValue.removeCourse?.bind(course, course.id)}>
+                                <DeleteIcon />
+                            </IconButton>
+                        }
                     >
                     <ListItemText
                         primary= {JSON.stringify(course)}
@@ -27,9 +28,7 @@ const Courses: React.FC = () => {
         return items;
     }
 
-    return <Box>
-            {/* <Typography variant="h2">Courses works {storeValue.count}</Typography>
-            <Button variant="outlined" onClick={storeValue.decrease}>Decrease count</Button> */}
+    return <Box component="div" >
             <List>
                 {getListItems()}
             </List>
