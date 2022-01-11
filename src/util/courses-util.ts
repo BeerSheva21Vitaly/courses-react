@@ -45,6 +45,8 @@ function createCourse(courseNames: string[], lecturers: string[], minHours: numb
 export function getStatisticsByKey(courses: Course[], key: string, interval: number) {
     let objStat =  _.countBy(courses, e => {   
         const courseCost: any = e[key as keyof Course];
+        // @ts-ignore
+        // const courseCost: any = e[key];
         if(typeof  courseCost === "number"){
             return Math.floor(courseCost / interval) * interval;
         } 

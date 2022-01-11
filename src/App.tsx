@@ -5,6 +5,7 @@ import {BrowserRouter, Routes, Route, Navigate} from 'react-router-dom';
 import NavigatorResponsive from './components/common/navigator-responsive';
 import {PATH_COURSES, routes} from './config/routes-сonfig';
 import { Colledge } from './models/colledge-type';
+import { Course } from './models/course-type';
 import { ColledgeContext, initialColledge} from './store/context';
 import { addRandomCourse } from './util/courses-util';
 
@@ -29,8 +30,8 @@ const App: FC = () => {
   storeCoursesState.addCourse = addCourse;
   storeCoursesState.removeCourse = removeCourse
   
-  function addCourse() {
-    addRandomCourse(storeCoursesState.courses);
+  function addCourse(course: Course) {
+    storeCoursesState.courses.push(course);
     setStore({...storeCoursesState});
   }
 

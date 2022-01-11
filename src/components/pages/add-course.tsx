@@ -10,7 +10,7 @@ const AddCourse: React.FC = () => {
             <Typography variant="h2">Add Course works </Typography>
             <Button  variant="contained" sx={{width: "250px"}}
             // проверяем на undefined. Если не undefined, то вызываем функцию
-                onClick={() => !!storeValue.addCourse && storeValue.addCourse(getRandomCourse())}>
+                onClick={() =>  storeValue.addCourse!(getRandomCourse())}>
                     Add random course</Button>
         </Box>
 }
