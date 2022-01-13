@@ -27,14 +27,14 @@ const App: FC = () => {
   
   useEffect(() => {
     console.log("effect");
-   const interval = setInterval(poller, pollingInterval);
-      return () => {clearInterval(interval)}
+    poller();
+    storeCoursesState.addCourse = addCourse;
+    storeCoursesState.removeCourse = removeCourse;
+    const interval = setInterval(poller, pollingInterval);
+    return () => clearInterval(interval)
  }, [])
 
  const [storeCoursesState, setStore] = React.useState<CoursesType>({courses: []});
-
-  storeCoursesState.addCourse = addCourse;
-  storeCoursesState.removeCourse = removeCourse;
   
   async function addCourse(course: Course) {
     await colledge.addCourse(course);
@@ -49,8 +49,9 @@ const App: FC = () => {
   async function poller() {   
     console.log("poller");
     const courses = await colledge.getAllCourses();
-    setStore({courses: courses})
-}
+    storeCoursesState.courses = courses;
+    setStore({...storeCoursesState})
+  }
   
   function getRoutes(): ReactNode[] {
     return routes.map(r => <Route path={r.path} element={r.element} key={r.path}/>)

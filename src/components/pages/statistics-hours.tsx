@@ -1,4 +1,4 @@
-import { List, ListItem, ListItemText, Typography } from "@mui/material";
+import { Box, List, ListItem, ListItemText, Typography } from "@mui/material";
 import React, { useContext } from "react";
 import { ColledgeContext } from "../../store/context";
 import { getStatisticsByKey } from "../../util/courses-util";
@@ -17,11 +17,10 @@ const StatisticsHours: React.FC = () => {
         return statisticsHours;
     }
 
-    return <Typography>
-        <List>
+    return <Box>
             <StatisticsList statistics={statisticsHours} />
-        </List>
-    </Typography>
+        </Box>
+    
 }
 
 export default StatisticsHours;

@@ -17,18 +17,17 @@ export default class CoursesServiceRest implements CoursesService {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify(course),          
-            }).then(r=>r.json()) as Promise<Course>
-        
+            }).then(r=>r.json()) as Promise<Course>       
     }
 
     async remove(id: number): Promise<Course> {
         const url = this.getUrlId(id);
-        const course = this.get(id) as Promise<Course> ;
-       await fetch(url,
+        const course = await this.get(id);
+        await fetch(url,
             {
                 method: "DELETE",
             });
-        return course;
+        return course as Course ;
     }
 
     async exists(id: number): Promise<boolean> {
@@ -42,26 +41,31 @@ export default class CoursesServiceRest implements CoursesService {
     }
 
     get(id?: number): Promise<Course> | Promise<Course[]> {
-        return id == undefined ? (fetch(this.url).then(r=>r.json()) as Promise<Course[]>):
-            (fetch(this.getUrlId(id)).then(r=>r.json()) as Promise<Course>);
-
+        return id == undefined ? fetchGet(this.url) as Promise<Course[]>:
+            fetchGet(this.getUrlId(id)) as Promise<Course>;
     }
     
     async update(id: number, newCourse: Course): Promise<Course> {
-        const response = await fetch(this.getUrlId(id), {
+        const oldCourse = await this.get(id);
+        await fetch(this.getUrlId(id), {
             method: "PUT",
             headers: {
                 "Content-Type": "appication/json"
             },
             body: JSON.stringify(newCourse)
         });
-        return await response.json();
+        return oldCourse as Course;
     }
     
     serverExceptionHandler() {
         throw "Server unavailable. Try later";
     }
     getUrlId(id: number): string{
-        return `${this.url}/${encodeURIComponent(id)}`;
+        return `${this.url}/${id}`;
     }
+
+}
+
+async function fetchGet(url: string): Promise<any> {
+    return await fetch(url).then(response => response.json());
 }

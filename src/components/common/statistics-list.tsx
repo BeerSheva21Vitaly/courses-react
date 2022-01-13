@@ -8,9 +8,9 @@ type Statistics = {
 const StatisticsList: React.FC<Statistics> = (props) => {
 function getListItems(): React.ReactNode[] {
     let items: React.ReactNode[] = [];
-    props.statistics.map(line => {          
+    props.statistics.map((line, index) => {          
                 items.push(
-                    <ListItem sx={{display:"flex"}}>
+                    <ListItem key={index} sx={{display:"flex"}}>
                         <ListItemText
                             primary= {JSON.stringify(line)}
                         />

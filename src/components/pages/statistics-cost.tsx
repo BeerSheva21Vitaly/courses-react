@@ -1,4 +1,4 @@
-import { IconButton, List, ListItem, ListItemText, Typography } from "@mui/material";
+import { Box, IconButton, List, ListItem, ListItemText, Typography } from "@mui/material";
 import React, { useContext } from "react";
 import { ColledgeContext } from "../../store/context";
 import { getStatisticsByKey } from "../../util/courses-util";
@@ -18,9 +18,9 @@ const StatisticsCost: React.FC = () => {
     }
 
 
-    return <Typography>
+    return <Box>
         <StatisticsList statistics= {statistics}/>
-    </Typography>
+    </Box>
 }
 
 export default StatisticsCost;
