@@ -29,6 +29,9 @@ const Courses: React.FC = () => {
     }
 
     return <Box component="div" >
+            <Box component="div">
+                <Typography>{`Courses: ${storeValue.courses.length}`}</Typography>
+            </Box>
             <List>
                 {getListItems()}
             </List>

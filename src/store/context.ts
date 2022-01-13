@@ -1,16 +1,16 @@
 import { createContext } from "react";
 import { Course } from "../models/course-type";
-import {Colledge} from "../models/colledge-type";
+import {CoursesType} from "../models/colledge-type";
 import { getDefaultCourses } from "../util/courses-util";
 
 const N_RANDOM_COURSES = 10;
-export const initialColledge: Colledge = getDefaultColledge();
+export const initialColledge: CoursesType = getDefaultColledge();
 
-export const ColledgeContext = createContext<Colledge>(initialColledge);
+export const ColledgeContext = createContext<CoursesType>(initialColledge);
 
-function getDefaultColledge(): Colledge {
+function getDefaultColledge(): CoursesType {
     const courses: Course[] = getDefaultCourses(N_RANDOM_COURSES);
-    const colledge: Colledge = {courses};
+    const colledge: CoursesType = {courses};
     return colledge;
 }
 

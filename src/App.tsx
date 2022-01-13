@@ -1,16 +1,17 @@
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { fontSize } from '@mui/system';
-import React, {FC, ReactNode, useContext, useState} from 'react';
-import {BrowserRouter, Routes, Route, Navigate} from 'react-router-dom';
+import React, {FC, ReactNode, useContext, useEffect, useState} from 'react';
+import {BrowserRouter, Routes, Route, Navigate, useLocation} from 'react-router-dom';
 import NavigatorResponsive from './components/common/navigator-responsive';
 import {PATH_COURSES, routes} from './config/routes-сonfig';
-import { Colledge } from './models/colledge-type';
+import { colledge, pollingInterval } from './config/servicesConfig';
+import { CoursesType } from './models/colledge-type';
 import { Course } from './models/course-type';
+
 import { ColledgeContext, initialColledge} from './store/context';
 import { addRandomCourse } from './util/courses-util';
 
-// настройка кастомных стилей элементов matreial ui делается через theme
-// 1. создаем объекты "тема по умолчанию"
+
 const theme = createTheme();
 // theme.typography.body1 = {
 //   fontSize: "1.2rem",
@@ -24,28 +25,33 @@ const theme = createTheme();
 
 const App: FC = () => {
   
-  //хук, который будет обрабатывать изменения ресурса типа StoreValue, который хранит глобальный контекст
-  const [storeCoursesState, setStore] = React.useState<Colledge>(initialColledge);
+  useEffect(() => {
+    console.log("effect");
+   const interval = setInterval(poller, pollingInterval);
+      return () => {clearInterval(interval)}
+ }, [])
+
+ const [storeCoursesState, setStore] = React.useState<CoursesType>({courses: []});
 
   storeCoursesState.addCourse = addCourse;
-  storeCoursesState.removeCourse = removeCourse
+  storeCoursesState.removeCourse = removeCourse;
   
-  function addCourse(course: Course) {
-    storeCoursesState.courses.push(course);
-    setStore({...storeCoursesState});
+  async function addCourse(course: Course) {
+    await colledge.addCourse(course);
+    await poller();
   }
 
-  function removeCourse(courseId: number) {
-    const courseIndex = storeCoursesState.courses.findIndex(c => c.id === courseId);
-    if(courseIndex >= 0) {
-      storeCoursesState.courses.splice(courseIndex, 1);
-      setStore({...storeCoursesState});
-    } else {
-      throw `Course with id ${courseId} can't be removed from Colledge because there is no course with this id`
-    }
+  async function removeCourse(courseId: number) {
+    await colledge.removeCourse(courseId);
+    await poller();
   }
-  
 
+  async function poller() {   
+    console.log("poller");
+    const courses = await colledge.getAllCourses();
+    setStore({courses: courses})
+}
+  
   function getRoutes(): ReactNode[] {
     return routes.map(r => <Route path={r.path} element={r.element} key={r.path}/>)
   }
@@ -66,3 +72,5 @@ const App: FC = () => {
 }
 
 export default App;
+
+
