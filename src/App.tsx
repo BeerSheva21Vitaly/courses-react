@@ -1,3 +1,4 @@
+import { Box, List, ListItem, ListItemText } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { fontSize } from '@mui/system';
 import React, {FC, ReactNode, useContext, useEffect, useState} from 'react';
@@ -7,6 +8,7 @@ import {PATH_COURSES, routes} from './config/routes-сonfig';
 import { colledge, pollingInterval } from './config/servicesConfig';
 import { CoursesType } from './models/colledge-type';
 import { Course } from './models/course-type';
+import PublisherNumbers from './publisher-numbers';
 
 import { ColledgeContext, initialColledge} from './store/context';
 import { addRandomCourse } from './util/courses-util';
@@ -24,54 +26,40 @@ const theme = createTheme();
 // }
 
 const App: FC = () => {
+  const publisher = new PublisherNumbers();
+  const [numbers, setNumbers] = useState<number[]>([]);
+  
   
   useEffect(() => {
-    console.log("effect");
-    poller();
-    storeCoursesState.addCourse = addCourse;
-    storeCoursesState.removeCourse = removeCourse;
-    const interval = setInterval(poller, pollingInterval);
-    return () => clearInterval(interval)
- }, [])
+      const subscription = publisher.getNumbers().subscribe({
+        next(arr: number[]) {
+          setNumbers(arr);
+        },
+        // по вызову метода error() у subscriber'а подписка отключается
+        error(err: any) {
+          console.log(err);
+        },
+      })
+      return () => subscription.unsubscribe();
+    },
+  [])
 
- const [storeCoursesState, setStore] = React.useState<CoursesType>({courses: []});
-  
-  async function addCourse(course: Course) {
-    await colledge.addCourse(course);
-    await poller();
-  }
-
-  async function removeCourse(courseId: number) {
-    await colledge.removeCourse(courseId);
-    await poller();
-  }
-
-  async function poller() {   
-    console.log("poller");
-    const courses = await colledge.getAllCourses();
-    storeCoursesState.courses = courses;
-    setStore({...storeCoursesState})
-  }
-  
-  function getRoutes(): ReactNode[] {
-    return routes.map(r => <Route path={r.path} element={r.element} key={r.path}/>)
-  }
-  return <ColledgeContext.Provider value={storeCoursesState}>
-    {/* Контекст провайдер - компонент, который обеспечивает объект глобального контекста */}
-      <ThemeProvider theme={theme} >
-    {/* Конфигурация раутинга  */}
-        <BrowserRouter>
-          <NavigatorResponsive items={routes} />
-          <Routes>
-            {getRoutes()}
-            {/* Редирект с главной страницы приложения на страницу курсов */}
-            <Route path="/" element={<Navigate to={PATH_COURSES}></Navigate>}/>
-          </Routes>
-        </BrowserRouter>
-      </ThemeProvider>
-    </ColledgeContext.Provider> 
+  function getItems(): React.ReactNode[] {
+    return numbers.map((number, index) => {
+      return <ListItem key={number}>
+        <ListItemText primary= {`${index+1}. ${number}`} />
+      </ListItem>
+    });
+}
+  return <Box>
+      <List>
+          {getItems()}
+      </List>
+  </Box>
 }
 
 export default App;
+
+
 
 
