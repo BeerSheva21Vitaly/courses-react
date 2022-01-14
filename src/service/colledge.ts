@@ -1,3 +1,4 @@
+import { Observable } from "rxjs";
 import { Course } from "../models/course-type";
 import { getRandomInteger } from "../util/common/random";
 import CoursesService from "./courses-service";
@@ -20,8 +21,8 @@ export default class Colledge {
     updateCourse(id: number, newCourse: Course): Promise<Course>{
         return this.coursesService.update(id, newCourse);
     }
-    getAllCourses(): Promise<Course[]> {
-        return this.coursesService.get() as Promise<Course[]>;
+    getAllCourses(): Observable<Course[]> {
+        return this.coursesService.get() as Observable<Course[]>;
     }
     getCourse(id: number): Promise<Course> {
         return this.coursesService.get(id) as Promise<Course>;
