@@ -8,9 +8,9 @@ export default class CoursesServiceRest implements CoursesService {
     private currentCourses: Course[] = [];
     public publisherCourses: PublisherCourses;
     constructor(private url: string, private pollingInterval: number) {
-        this.poller(this.url);
+        this.poller();
         this.publisherCourses = new PublisherCourses(this.currentCourses);
-        setInterval(this.poller.bind(this, this.url), this.pollingInterval);
+        setInterval(this.poller.bind(this), this.pollingInterval);
     }
     
     async add(course: Course): Promise<Course> {
@@ -69,9 +69,9 @@ export default class CoursesServiceRest implements CoursesService {
         return `${this.url}/${id}`;
     }
 
-    async poller(url: string) {
+    async poller() {
         console.log("poller");
-        const courses: Course[] = await fetchGet(url);
+        const courses: Course[] = await fetchGet(this.url);
         if( JSON.stringify(courses) != JSON.stringify(this.currentCourses)) {
             this.currentCourses = courses;
             this.publisherCourses.courses = courses;
