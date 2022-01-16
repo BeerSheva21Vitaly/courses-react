@@ -28,8 +28,16 @@ const theme = createTheme();
 const App: FC = () => {
   useEffect(() => {
     console.log("effect");
-   const interval = setInterval(poller, pollingInterval);
-      return () => {clearInterval(interval)}
+    const subscription = colledge.getAllCourses().subscribe({
+      next(arr) {
+        storeCoursesState.courses = arr;
+        setStore({...storeCoursesState});
+      },
+      error(err: any) {
+        console.log(err);
+      }
+    })
+      return () => {subscription.unsubscribe()}
  }, [])
 
  const [storeCoursesState, setStore] = React.useState<CoursesType>({courses: []});
@@ -39,22 +47,14 @@ const App: FC = () => {
   
   async function addCourse(course: Course) {
     await colledge.addCourse(course);
-    await poller();
   }
 
   async function removeCourse(courseId: number) {
     await colledge.removeCourse(courseId);
-    await poller();
   }
 
   async function poller() {   
-    console.log("poller");
-    colledge.getAllCourses().subscribe({
-      next(arr) {
-        storeCoursesState.courses = arr;
-        setStore({...storeCoursesState});
-      }
-    })
+    
 }
   
   function getRoutes(): ReactNode[] {

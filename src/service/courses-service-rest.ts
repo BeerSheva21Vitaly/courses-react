@@ -1,13 +1,16 @@
 import { Course } from "../models/course-type";
 import CoursesService from "./courses-service";
 import { from, Observable } from "rxjs";
+import PublisherCourses from "../util/publisher-courses";
 
 
 export default class CoursesServiceRest implements CoursesService {
-    constructor(private url: string) {
-        if(!url) {
-            throw "URL is not provided"
-        }
+    private currentCourses: Course[] = [];
+    public publisherCourses: PublisherCourses;
+    constructor(private url: string, private pollingInterval: number) {
+        this.poller(this.url);
+        this.publisherCourses = new PublisherCourses(this.currentCourses);
+        setInterval(this.poller.bind(this, this.url), this.pollingInterval);
     }
     
     async add(course: Course): Promise<Course> {
@@ -43,7 +46,7 @@ export default class CoursesServiceRest implements CoursesService {
 
     get(id?: number): Promise<Course> | Observable<Course[]> {
         //FIXMI: there should be real observable
-        return id == undefined ? from(fetchGet(this.url)) as Observable<Course[]>:
+        return id == undefined ? this.publisherCourses.getCourses() :
             fetchGet(this.getUrlId(id)) as Promise<Course>;
     }
     
@@ -64,6 +67,16 @@ export default class CoursesServiceRest implements CoursesService {
     }
     getUrlId(id: number): string{
         return `${this.url}/${id}`;
+    }
+
+    async poller(url: string) {
+        console.log("poller");
+        const courses: Course[] = await fetchGet(url);
+        if( JSON.stringify(courses) != JSON.stringify(this.currentCourses)) {
+            this.currentCourses = courses;
+            this.publisherCourses.courses = courses;
+            this.publisherCourses.isNext = true;
+        }
     }
 
 }
