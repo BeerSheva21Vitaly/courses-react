@@ -1,4 +1,5 @@
 import { Observable } from "rxjs";
+import { publishingInterval } from "../config/servicesConfig";
 import { Course } from "../models/course-type";
 
 export default class PublisherCourses {
@@ -19,7 +20,7 @@ export default class PublisherCourses {
                     subscriber.error(err);
                     clearInterval(interval);
                 }               
-            }, 2000)
+            }, publishingInterval)
             //возвращается функция, которая будет вызвана по факту отписки от этого паблишера
             return () => clearInterval(interval);
         })

@@ -1,14 +1,12 @@
-import { Box, List, ListItem, ListItemText } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { fontSize } from '@mui/system';
 import React, {FC, ReactNode, useContext, useEffect, useState} from 'react';
 import {BrowserRouter, Routes, Route, Navigate, useLocation} from 'react-router-dom';
 import NavigatorResponsive from './components/common/navigator-responsive';
 import {PATH_COURSES, routes} from './config/routes-сonfig';
-import { colledge, pollingInterval } from './config/servicesConfig';
+import { colledge } from './config/servicesConfig';
 import { CoursesType } from './models/colledge-type';
 import { Course } from './models/course-type';
-import PublisherNumbers from './publisher-numbers';
 
 import { ColledgeContext, initialColledge} from './store/context';
 import { addRandomCourse } from './util/courses-util';
@@ -35,9 +33,10 @@ const App: FC = () => {
       },
       error(err: any) {
         console.log(err);
+        subscription.unsubscribe();
       }
     })
-      return () => {subscription.unsubscribe()}
+      return () => subscription.unsubscribe();
  }, [])
 
  const [storeCoursesState, setStore] = React.useState<CoursesType>({courses: []});

@@ -14,14 +14,17 @@ export default class CoursesServiceRest implements CoursesService {
     }
     
     async add(course: Course): Promise<Course> {
-        return fetch(this.url, 
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(course),          
-            }).then(r=>r.json()) as Promise<Course>       
+        if(await this.exists(course.id)) {
+            throw `Course with id ${course.id} already exists`
+        } else {
+            return fetch(this.url, 
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(course),          
+                }).then(r=>r.json()) as Promise<Course>  }         
     }
 
     async remove(id: number): Promise<Course> {

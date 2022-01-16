@@ -7,13 +7,11 @@ import courseData from "../config/courseData.json"
 export default class Colledge {
     constructor(private coursesService: CoursesService) {}
 
-    async addCourse(course: Course): Promise<Course> {
+    addCourse(course: Course): Promise<Course> {
         if (!this.validate(course)) {
             throw "Validation failed"
         }
-        const id = await this.getId();
-        course.id = id;
-        return await this.coursesService.add(course)
+        return this.coursesService.add(course)
     }
     removeCourse(id: number): Promise<Course> {
         return this.coursesService.remove(id);
