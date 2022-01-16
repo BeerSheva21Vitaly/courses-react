@@ -3,6 +3,7 @@ import CoursesService from "./courses-service";
 import { from, Observable } from "rxjs";
 import PublisherCourses from "../util/publisher-courses";
 
+export const AUTH_TOKEN = "auth_token"
 
 export default class CoursesServiceRest implements CoursesService {
     private currentCourses: Course[] = [];
@@ -82,6 +83,13 @@ export default class CoursesServiceRest implements CoursesService {
         }
     }
 
+}
+
+function getHeaders(): { Authorization: string, "Content-Type": string } {
+    return {
+        Authorization: "Bearer " + localStorage.getItem(AUTH_TOKEN),
+        "Content-Type": "application/json"
+    };
 }
 
 async function fetchGet(url: string): Promise<any> {
