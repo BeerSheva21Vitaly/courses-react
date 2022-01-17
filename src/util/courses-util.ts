@@ -29,7 +29,7 @@ export function getRandomCourse(): Course {
 function createCourse(courseNames: string[], lecturers: string[], minHours: number, maxHours: number,
         minCost: number, maxCost: number, types: string[], timing: string[], minYear: number,
             maxYear: number): Course {
-    const id = getRandomInteger(0, Number.MAX_VALUE);
+    const id = getRandomInteger(0, 999999);
     const courseName = courseNames[getRandomInteger(0, courseNames.length - 1)];
     const lecturerName = lecturers[getRandomInteger(0, lecturers.length - 1)];
     const hours = getRandomInteger(minHours, maxHours);

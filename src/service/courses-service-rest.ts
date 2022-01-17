@@ -15,15 +15,14 @@ export default class CoursesServiceRest implements CoursesService {
     }
     
     async add(course: Course): Promise<Course> {
+        (course as any).userId = 1;
         if(await this.exists(course.id)) {
             throw `Course with id ${course.id} already exists`
         } else {
             return fetch(this.url, 
                 {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
+                    headers: getHeaders(),
                     body: JSON.stringify(course),          
                 }).then(r=>r.json()) as Promise<Course>  }         
     }
@@ -34,13 +33,16 @@ export default class CoursesServiceRest implements CoursesService {
         await fetch(url,
             {
                 method: "DELETE",
+                headers: getHeaders(),
             });
         return course as Course ;
     }
 
     async exists(id: number): Promise<boolean> {
         try {
-            const response = await fetch(this.getUrlId(id));
+            const response = await fetch(this.getUrlId(id), {
+                headers: getHeaders(),
+            });
             return response.ok;
         } catch (err) {
             this.serverExceptionHandler();
@@ -49,8 +51,7 @@ export default class CoursesServiceRest implements CoursesService {
     }
 
     get(id?: number): Promise<Course> | Observable<Course[]> {
-        //FIXMI: there should be real observable
-        return id == undefined ? this.publisherCourses.getCourses() :
+            return id == undefined ? this.publisherCourses.getCourses() :
             fetchGet(this.getUrlId(id)) as Promise<Course>;
     }
     
@@ -58,9 +59,7 @@ export default class CoursesServiceRest implements CoursesService {
         const oldCourse = await this.get(id);
         await fetch(this.getUrlId(id), {
             method: "PUT",
-            headers: {
-                "Content-Type": "appication/json"
-            },
+            headers: getHeaders(),
             body: JSON.stringify(newCourse)
         });
         return oldCourse as Course;
@@ -93,5 +92,7 @@ function getHeaders(): { Authorization: string, "Content-Type": string } {
 }
 
 async function fetchGet(url: string): Promise<any> {
-    return await fetch(url).then(response => response.json());
+    return await fetch(url, {
+        headers: getHeaders(),
+    }).then(response => response.json());
 }

@@ -2,9 +2,10 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { fontSize } from '@mui/system';
 import React, {FC, ReactNode, useContext, useEffect, useState} from 'react';
 import {BrowserRouter, Routes, Route, Navigate, useLocation} from 'react-router-dom';
+import { Subscription } from 'rxjs';
 import NavigatorResponsive from './components/common/navigator-responsive';
 import {PATH_COURSES, routes} from './config/routes-сonfig';
-import { colledge } from './config/servicesConfig';
+import { authService, colledge } from './config/servicesConfig';
 import { CoursesType } from './models/colledge-type';
 import { Course } from './models/course-type';
 
@@ -26,23 +27,41 @@ const theme = createTheme();
 const App: FC = () => {
   useEffect(() => {
     console.log("effect");
-    const subscription = colledge.getAllCourses().subscribe({
-      next(arr) {
-        storeCoursesState.courses = arr;
-        setStore({...storeCoursesState});
-      },
-      error(err: any) {
-        console.log(err);
-        subscription.unsubscribe();
-      }
-    })
-      return () => subscription.unsubscribe();
+    function getData(): Subscription {
+        return colledge.getAllCourses().subscribe({
+          next(arr) {
+            storeCoursesState.courses = arr;
+            setStore({...storeCoursesState});
+          },
+          error(err: any) {
+            console.log(err);
+          }
+      })
+    } 
+    function getUserData(): Subscription {
+        return authService.getUserData().subscribe({
+          next(ud) {
+            storeCoursesState.userData = ud;
+            setStore({...storeCoursesState});
+          },
+          error(err: any) {
+            console.log(err);
+          }
+      })
+    }
+    storeCoursesState.addCourse = addCourse;
+    storeCoursesState.removeCourse = removeCourse;
+    const subscriptionUserData = getUserData();
+    const subscription = getData();
+    return () => {
+      subscription.unsubscribe();
+      subscriptionUserData.unsubscribe();
+    }
  }, [])
 
- const [storeCoursesState, setStore] = React.useState<CoursesType>({courses: []});
+ const [storeCoursesState, setStore] = React.useState<CoursesType>(initialColledge);
 
-  storeCoursesState.addCourse = addCourse;
-  storeCoursesState.removeCourse = removeCourse;
+  
   
   async function addCourse(course: Course) {
     await colledge.addCourse(course);
@@ -51,10 +70,6 @@ const App: FC = () => {
   async function removeCourse(courseId: number) {
     await colledge.removeCourse(courseId);
   }
-
-  async function poller() {   
-    
-}
   
   function getRoutes(): ReactNode[] {
     return routes.map(r => <Route path={r.path} element={r.element} key={r.path}/>)

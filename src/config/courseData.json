@@ -33,5 +33,6 @@
     ],
     "costDivider": [
         1000, 2000, 3000, 5000, 10000
-    ]
+    ],
+    "passwordLength": 8
 }
