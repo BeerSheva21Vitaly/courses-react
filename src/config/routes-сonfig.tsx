@@ -17,12 +17,12 @@ export const PATH_STATISTICS_HOURS = "/courses/statistics/hours";
 export const PATH_STATISTICS_COST = "/courses/statistics/cost"
 
 export const routes: RouteType[] = [
-    {path: PATH_COURSES, element: <Courses />, label: "Courses"},
-    {path: PATH_ADD_COURSE, element: <AddCourse />, label: "Add course"},
-    {path: PATH_STATISTICS_COST, element: <StatisticsCost />, label: "Cost statistics"},
-    {path: PATH_STATISTICS_HOURS, element: <StatisticsHours />, label: "Hours statistics"},
+    {path: PATH_COURSES, element: <Courses />, label: "Courses", authenticated: true},
+    {path: PATH_ADD_COURSE, element: <AddCourse />, label: "Add course", adminOnly: true},
+    {path: PATH_STATISTICS_COST, element: <StatisticsCost />, label: "Cost statistics", authenticated: true},
+    {path: PATH_STATISTICS_HOURS, element: <StatisticsHours />, label: "Hours statistics", authenticated: true},
     {path: PATH_LOGIN, element: <Login />, label: "Sign in"},
-    {path: PATH_LOGOUT, element: <Logout />, label: "Sign out"},
+    {path: PATH_LOGOUT, element: <Logout />, label: "Sign out", authenticated: true},
 ]
 
 

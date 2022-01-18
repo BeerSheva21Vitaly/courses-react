@@ -7,6 +7,8 @@ import {nonAuthorizedUser, UserData} from "../models/common/user-data";
 import { Observable } from "rxjs";
 import AuthService from "./auth-service";
 import { AUTH_TOKEN } from "./courses-service-rest";
+import { Buffer } from "buffer";
+import { result } from "lodash";
 
 const pollingInterval: number = 2000;
 
@@ -56,7 +58,7 @@ export default class AuthServiceJwt implements AuthService {
 
 function fetchUserData(): UserData {
     const token: string | null = localStorage.getItem(AUTH_TOKEN);
-    if (!!token) {
+    if (!token) {
         return nonAuthorizedUser;
     } else {
         return tokenToUserData(token as string);
@@ -65,12 +67,18 @@ function fetchUserData(): UserData {
 
 function tokenToUserData(token: string): UserData {
     //payload зранится в 1-м индексе JWT
+    let result: UserData = nonAuthorizedUser;
     const rawPayLoad = token.split('.')[1] ; //JSON in base64
-    const payload: any = Buffer.from(rawPayLoad, "base64").toString('ascii');
-    return payload.exp < (Date.now() / 1000) ? nonAuthorizedUser : {
-        username: payload.email,
-        isAdmin: +payload.sub === 1,
-        displayName: payload.email,
+    const payload: any = JSON.parse(Buffer.from(rawPayLoad, "base64").toString('ascii'));
+    if(payload.exp < Date.now() / 1000) {
+        localStorage.removeItem(AUTH_TOKEN);
+    } else {
+        result = {
+            username: payload.email,
+            isAdmin: +payload.sub === 1,
+            displayName: payload.email,
+        }
     }
+    return result;
 }
 

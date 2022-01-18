@@ -1,5 +1,5 @@
 import { Tabs, Tab } from '@mui/material';
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { RouteType } from '../../models/common/route-type';
 
@@ -11,6 +11,10 @@ function getInitialTabIndex(path: string, items: RouteType[]): number {
 const NavigatorWeb: React.FC<{items: RouteType[]}> = (props) => {
     //useLocation() возвразщает локацию, в которой сейчас находится пользователь приложения
     const location = useLocation();
+
+    useEffect(() => {
+        setActiveTab(getInitialTabIndex(location.pathname, props.items));
+    }, [props.items])
     
    const [activeTabIndex, setActiveTab] = React.useState(getInitialTabIndex(location.pathname,
         props.items));
@@ -21,7 +25,7 @@ const NavigatorWeb: React.FC<{items: RouteType[]}> = (props) => {
    function onChangeHandler(event: any, newValueNumber: number) {
         setActiveTab(newValueNumber);
    }
-   return <Tabs value={activeTabIndex} onChange={onChangeHandler}>
+   return <Tabs value={activeTabIndex >= props.items.length ? 0 : activeTabIndex} onChange={onChangeHandler}>
         {getTabs()}
     </Tabs>
 };

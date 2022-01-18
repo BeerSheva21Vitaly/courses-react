@@ -74,11 +74,13 @@ export default class CoursesServiceRest implements CoursesService {
 
     async poller() {
         console.log("poller");
-        const courses: Course[] = await fetchGet(this.url);
-        if( JSON.stringify(courses) != JSON.stringify(this.currentCourses)) {
-            this.currentCourses = courses;
-            this.publisherCourses.courses = courses;
-            this.publisherCourses.isNext = true;
+        if(!!localStorage.getItem(AUTH_TOKEN)) {
+            const courses: Course[] = await fetchGet(this.url);
+            if( JSON.stringify(courses) != JSON.stringify(this.currentCourses)) {
+                this.currentCourses = courses;
+                this.publisherCourses.courses = courses;
+                this.publisherCourses.isNext = true;
+            }
         }
     }
 

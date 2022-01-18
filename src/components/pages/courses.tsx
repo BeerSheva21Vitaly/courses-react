@@ -11,8 +11,11 @@ const Courses: React.FC = () => {
          storeValue.courses.map(course => {          
                 items.push(
                     <ListItem key={course.id}
-                        secondaryAction={
-                            <IconButton edge="end" aria-label="delete" 
+                     secondaryAction={
+                        storeValue.userData.isAdmin &&
+                            <IconButton 
+                                edge="end"
+                                aria-label="delete" 
                                 // onClick={() => !!storeValue.removeCourse && storeValue.removeCourse(course.id)}>
                                 onClick={storeValue.removeCourse?.bind(course, course.id)}>
                                 <DeleteIcon />
