@@ -103,7 +103,7 @@ const AddCourseForm: FC<AddCoursFormType> = (props) => {
         if(event.target.checked) {
             enteredDayEvening.push(event.target.value);
         } else {
-            const elementIndex: number = enteredDayEvening.findIndex(event.target.value);
+            const elementIndex: number = enteredDayEvening.indexOf(event.target.value);
             enteredDayEvening.splice(elementIndex, 1);
         } 
         const message = validateDayEveningFn(enteredDayEvening);
@@ -208,15 +208,14 @@ const AddCourseForm: FC<AddCoursFormType> = (props) => {
                     <FormGroup>
                         {getCheckboxes(courseConfig.timing)}
                     </FormGroup>
-                    {!checkboxesErrorMessage && <FormHelperText>{checkboxesErrorMessage}</FormHelperText>}
+                    {checkboxesErrorMessage && <FormHelperText>{checkboxesErrorMessage}</FormHelperText>}
                 </FormControl>
             </Box>
             <Box
                 sx={{marginTop: 2}}>
                 <Button type="submit" disabled ={!flValid} variant="contained">Add course</Button>
                 <Button type="reset" onClick={resetFn}> Reset</Button>
-            </Box>
-            
+            </Box>           
         </Box>
     );
 };
