@@ -37,7 +37,7 @@ const App: FC = () => {
   console.log("effectUserData");
   function getUserData(): Subscription {
       return authService.getUserData().subscribe({
-        next(ud) {
+        next(ud: UserData) {
           storeCoursesState.userData = ud;
           setStore({...storeCoursesState});
         },

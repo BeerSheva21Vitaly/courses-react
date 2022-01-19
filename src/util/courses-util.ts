@@ -26,6 +26,20 @@ export function getRandomCourse(): Course {
     return course;
 }
 
+export function getEmptyCourse(): Course {
+    const course: Course = {
+        id: 0,
+        courseName: "",
+        lecturerName: "",
+        hours: 0,
+        cost: 0,
+        type: "",
+        dayEvening: [],
+        openDate: new Date(), //FIXMI change to min possible date
+    }
+    return course;
+}
+
 function createCourse(courseNames: string[], lecturers: string[], minHours: number, maxHours: number,
         minCost: number, maxCost: number, types: string[], timing: string[], minYear: number,
             maxYear: number): Course {
