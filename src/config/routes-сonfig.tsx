@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import AddCourse from "../components/pages/add-course";
+import Generation from "../components/pages/course-generation";
 import Courses from "../components/pages/courses";
 import Login from "../components/pages/login";
 import Logout from "../components/pages/logout";
@@ -25,4 +26,8 @@ export const routes: RouteType[] = [
     {path: PATH_LOGOUT, element: <Logout />, label: "Sign out", authenticated: true},
 ]
 
+export const developmentRoutes: RouteType[] = [
+    {path: "/courses/development/generation", element: <Generation />,
+         label: 'Courses generation', adminOnly: true},
+]
 

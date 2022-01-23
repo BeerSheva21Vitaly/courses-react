@@ -74,14 +74,14 @@ const AddCourseForm: FC<AddCoursFormType> = (props) => {
         setCourse({...courseState});
     }
     function handleChangeHours(event: any) {
-        const enteredHours = event.target.value as number;
+        const enteredHours = Number.parseInt(event.target.value);
         const message = validateHoursFn(enteredHours);
         setHoursErrorMessage(message);
         courseState.hours = enteredHours;
         setCourse({...courseState});
     }
     function handleChangeCost(event: any) {
-        const enteredCost = event.target.value as number;
+        const enteredCost = Number.parseInt(event.target.value);
         const message = validateCostFn(enteredCost);
         setCostErrorMessage(message);
         courseState.cost = enteredCost;

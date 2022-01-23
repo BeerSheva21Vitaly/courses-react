@@ -24,7 +24,7 @@ export default class CoursesServiceRest implements CoursesService {
                     method: "POST",
                     headers: getHeaders(),
                     body: JSON.stringify(course),          
-                }).then(r=>r.json()) as Promise<Course>  }         
+                }).then(r=>r.json()).catch(r => console.log(r)) as Promise<Course>  }         
     }
 
     async remove(id: number): Promise<Course> {

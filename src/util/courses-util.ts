@@ -2,6 +2,7 @@ import { Course } from "../models/course-type";
 import { getRandomInteger, getRandomElement, getRandomDate } from "./common/random";
 import courseData from "../config/courseData.json"
 import _ from "lodash";
+import { StatisticsLine } from "../models/statistics-line-type";
 
 export function getDefaultCourses(nRandomCourses: number): Course[] {
     let courses: Course[] = [];
@@ -69,10 +70,10 @@ export function getStatisticsByKey(courses: Course[], key: string, interval: num
      return getInterval(objStat, interval);
 }
 
-function getInterval(objStat: _.Dictionary<number>, interval: number){
-    let res = [];
+function getInterval(objStat: _.Dictionary<number>, interval: number): StatisticsLine[]{
+    let res: StatisticsLine[] = [];
     for (let key in objStat) {
-        let minInterval = key;
+        let minInterval = +key;
         let maxInterval = +key + +interval - 1;
         let amount = objStat[key];
         res.push({minInterval:minInterval, maxInterval:maxInterval, amount:amount});

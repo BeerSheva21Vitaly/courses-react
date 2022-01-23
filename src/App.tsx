@@ -4,7 +4,7 @@ import React, {FC, ReactNode, useContext, useEffect, useState} from 'react';
 import {BrowserRouter, Routes, Route, Navigate, useLocation} from 'react-router-dom';
 import { Subscription } from 'rxjs';
 import NavigatorResponsive from './components/common/navigator-responsive';
-import {PATH_COURSES, PATH_LOGIN, routes} from './config/routes-сonfig';
+import {developmentRoutes, PATH_COURSES, PATH_LOGIN, routes} from './config/routes-сonfig';
 import { authService, colledge } from './config/servicesConfig';
 import { CoursesType } from './models/colledge-type';
 import { RouteType } from './models/common/route-type';
@@ -12,7 +12,7 @@ import { UserData } from './models/common/user-data';
 import { Course } from './models/course-type';
 
 import { ColledgeContext, initialColledge} from './store/context';
-import { addRandomCourse } from './util/courses-util';
+import process from "process";
 
 
 const theme = createTheme();
@@ -26,7 +26,11 @@ const theme = createTheme();
 //   }
 // }
 function getRelevantRoutes(userData: UserData): RouteType[] {
-  return routes.filter(r => 
+  let resRoutes = routes;
+  if(process.env.NODE_ENV === 'development') {
+    resRoutes = resRoutes.concat(developmentRoutes);
+  }
+  return resRoutes.filter(r => 
     (!!userData.username && r.authenticated) //попадают route'ы, которые должны быть у авторизованных
     || (userData.isAdmin && r.adminOnly) // попадают route'ы, которые должны быть у админа
     || (!userData.username && !r.authenticated && !r.adminOnly)) //попадают route'ы для неавторизованных
@@ -75,9 +79,7 @@ const [storeCoursesState, setStore] = React.useState<CoursesType>(initialColledg
       subscription.unsubscribe();
     }
  }, [storeCoursesState.userData])
-
-
-  
+ 
   async function addCourse(course: Course) {
     await colledge.addCourse(course);
   }
