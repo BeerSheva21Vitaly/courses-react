@@ -1,8 +1,8 @@
 import { Box, TextField, Button, Typography } from '@mui/material';
-import React, { FC, useContext, useState } from 'react';
-import { Course } from '../../models/course-type';
-import { ColledgeContext } from '../../store/context';
-import { getDefaultCourses } from '../../util/courses-util';
+import React, { FC, useContext, useEffect, useMemo, useState } from 'react';
+import { Course } from '../../../models/course-type';
+import { ColledgeContext } from '../../../store/context';
+import { getDefaultCourses } from '../../../util/courses-util';
 
 const MAX_COURSES_NUMBER: number = 100;
 
@@ -10,14 +10,18 @@ const Generation: FC = () => {
     const storeValue = useContext(ColledgeContext);
     const [coursesNumber, setCoursesNumber] = useState<number>(0);
     const [errorMessage, setErrorMessage] = useState<string>('');
+    const [isValid, setIsValid] = useState(false);
+    useEffect(
+        () => setIsValid(coursesNumber > 0 && coursesNumber <= 100),
+        [coursesNumber])
 
     function  handleChange(event: any) {
         const enteredNumber = event.target.value;
-        if(isValid(enteredNumber)) {
+        if(isValidFn(enteredNumber)) {
             setCoursesNumber(enteredNumber);
         }
     }
-    function isValid(enteredNumber: number): boolean {
+    function isValidFn(enteredNumber: number): boolean {
         if(enteredNumber > 0 && enteredNumber <= MAX_COURSES_NUMBER) {
             setErrorMessage('');
             setCoursesNumber(enteredNumber);
@@ -35,6 +39,8 @@ const Generation: FC = () => {
         for(let randomCourse of randomCourses) {
             await addRandomCourse(randomCourse);
         }
+        event.target.reset();
+        setCoursesNumber(0);
     }
     async function addRandomCourse(course: Course) {
         await storeValue.addCourse!(course);
@@ -43,6 +49,7 @@ const Generation: FC = () => {
     return (
         <Box 
             component ="form"
+            id="form"
             onSubmit={onSubmit}
             sx={{display: "flex", flexDirection: "column", margin: 2}}>
             <Box component="div">
@@ -52,6 +59,7 @@ const Generation: FC = () => {
                 <TextField
                      id="course-qty"
                      label="Quantity"
+                     placeholder="For example, 10"
                      variant="outlined"
                      type="number"
                      error={!!errorMessage}
@@ -60,7 +68,7 @@ const Generation: FC = () => {
             </Box>
             <Box
                 sx={{marginTop: 2}}>
-                <Button type="submit" disabled ={!!errorMessage} variant="contained">Add course</Button>
+                <Button type="submit" disabled ={!isValid} variant="contained">Add course</Button>
             </Box>           
         </Box>
     );

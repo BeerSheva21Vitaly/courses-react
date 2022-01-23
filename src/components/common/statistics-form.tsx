@@ -11,7 +11,7 @@ type StatisticsFormType = {
 const StatisticsForm: FC<StatisticsFormType> = (props) => {
         const {setStatisticsFn, intervals} = props;
 
-        const [selectedInterval, setInterval] = useState<number>();
+        const [selectedInterval, setInterval] = useState<number>(intervals[0]);
 
         function getSelectItems(): React.ReactNode[] {
             let items: React.ReactNode[] = [];
@@ -37,7 +37,7 @@ const StatisticsForm: FC<StatisticsFormType> = (props) => {
             }
         }
         function resetFn() {
-            setInterval(0);
+            setInterval(intervals[0]);
         }
 
     return (

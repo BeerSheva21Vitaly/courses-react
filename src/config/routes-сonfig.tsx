@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import AddCourse from "../components/pages/add-course";
-import Generation from "../components/pages/course-generation";
+import Generation from "../components/pages/development/course-generation";
 import Courses from "../components/pages/courses";
 import Login from "../components/pages/login";
 import Logout from "../components/pages/logout";
