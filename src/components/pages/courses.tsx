@@ -7,6 +7,7 @@ import { DataGrid, GridActionsCellItem, GridColDef, GridRowId, GridRowParams, Gr
 import { UserData } from "../../models/common/user-data";
 import { Course } from "../../models/course-type";
 import DialogConfirmation from "../common/dialog-confirmation";
+import Details from "../common/details";
 
 
 function getRows(courses: Course[]): GridRowsProp {
@@ -60,7 +61,7 @@ const Courses: React.FC = () => {
             {field: 'hours', headerName: 'Hours', type: 'number', editable: !!userData.isAdmin, align: 'center', headerAlign: 'center'},
             {field: 'cost', headerName: 'Cost', type: 'number', editable: !!userData.isAdmin, align: 'center', headerAlign: 'center'},
             {field: 'openDate', headerName: 'Start date', type: 'date', editable: !!userData.isAdmin, flex: 150, align: 'center', headerAlign: 'center'},
-            {field: 'actions', headerName: 'Actions', type: 'actions', flex: 1, align: 'center', headerAlign: 'center', 
+            {field: 'actions', headerName: 'Actions', type: 'actions', flex: 100, align: 'center', headerAlign: 'center', 
                 getActions: (params: GridRowParams) => {
                     return getAvailableActions(userData, +params.id.valueOf());
                 }}
@@ -69,9 +70,23 @@ const Courses: React.FC = () => {
         ]
     }
     function getDialogData(): ReactNode {
-        return <Box>
-            {JSON.stringify(storeValue.courses.find(course => course.id === selectedCourseId))}
-        </Box>
+        return (
+        // <Box>
+        //     {JSON.stringify(storeValue.courses.find(course => course.id === selectedCourseId))}
+        // </Box>
+            <Details 
+                data={getCourseData(storeValue.courses.find(course => course.id === selectedCourseId))} />
+        )
+    }
+
+    function getCourseData(course?: Course): {key: string, value: string}[] {
+        let res = [];
+        if(!!course) {
+            for(let key in course) {
+                res.push({key:key, value: (course as any)[key].toString()});
+            }
+        }
+        return res;
     }
 
     return <Box
@@ -92,7 +107,7 @@ const Courses: React.FC = () => {
                     isVisible={isRemoveDialogVisible}
                     isCancelAvailable={true}
                     dialogTitle={'Remove course'}
-                    dialogContentText={`Would you like to remove course ID${selectedCourseId}?`}
+                    dialogContentText={`Would you like to remove course with ID ${selectedCourseId}?`}
                     handleAgreeFn={async function () {
                        await storeValue.removeCourse!(selectedCourseId);
                        setIsRemoveDialogVisible(false);
