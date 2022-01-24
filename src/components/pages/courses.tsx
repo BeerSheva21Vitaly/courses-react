@@ -71,9 +71,6 @@ const Courses: React.FC = () => {
     }
     function getDialogData(): ReactNode {
         return (
-        // <Box>
-        //     {JSON.stringify(storeValue.courses.find(course => course.id === selectedCourseId))}
-        // </Box>
             <Details 
                 data={getCourseData(storeValue.courses.find(course => course.id === selectedCourseId))} />
         )
