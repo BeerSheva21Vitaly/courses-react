@@ -58,7 +58,7 @@ function createCourse(courseNames: string[], lecturers: string[], minHours: numb
 }
 
 export function getStatisticsByKey(courses: Course[], key: string, interval: number) {
-    let objStat =  _.countBy(courses, e => {   
+    const objStat =  _.countBy(courses, e => {   
         const courseCost: any = e[key as keyof Course];
         // @ts-ignore
         // const courseCost: any = e[key];
@@ -71,11 +71,11 @@ export function getStatisticsByKey(courses: Course[], key: string, interval: num
 }
 
 function getInterval(objStat: _.Dictionary<number>, interval: number): StatisticsLine[]{
-    let res: StatisticsLine[] = [];
+    const res: StatisticsLine[] = [];
     for (let key in objStat) {
-        let minInterval = +key;
-        let maxInterval = +key + +interval - 1;
-        let amount = objStat[key];
+        const minInterval = +key;
+        const maxInterval = +key + +interval - 1;
+        const amount = objStat[key];
         res.push({minInterval:minInterval, maxInterval:maxInterval, amount:amount});
       }
     return res;

@@ -1,4 +1,5 @@
 import { Observable } from "rxjs";
+import {map} from "rxjs/operators";
 import { Course } from "../models/course-type";
 import { getRandomInteger } from "../util/common/random";
 import CoursesService from "./courses-service";
@@ -20,7 +21,12 @@ export default class Colledge {
         return this.coursesService.update(id, newCourse);
     }
     getAllCourses(): Observable<Course[]> {
-        return this.coursesService.get() as Observable<Course[]>;
+        //метод pipe() позволяет работать с содержимым подписки как со stream() в java
+        return (this.coursesService.get() as Observable<Course[]>)
+        .pipe(
+            // меняем каждый объект курса так, чтобы в поле openDate хоанилась не string, а Date
+            map(courses => courses.map(course => ({...course, openDate: new Date(course.openDate)})))
+        )
     }
     getCourse(id: number): Promise<Course> {
         return this.coursesService.get(id) as Promise<Course>;
@@ -32,7 +38,6 @@ export default class Colledge {
         } while (await this.coursesService.exists(randomId))
         return randomId;
     }
-
     validate(course: Course) {
         const { minCost, maxCost, minHours, maxHours, minYear, maxYear, courseNames, lecturers, types, timing } = { ...courseData };
         let { courseName, lecturerName, hours, cost, type, dayEvening, openDate } = { ...course };
