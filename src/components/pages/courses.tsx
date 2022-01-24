@@ -8,6 +8,7 @@ import { UserData } from "../../models/common/user-data";
 import { Course } from "../../models/course-type";
 import DialogConfirmation from "../common/dialog-confirmation";
 import Details from "../common/details";
+import DialogInfo from "../common/dialog-info";
 
 
 function getRows(courses: Course[]): GridRowsProp {
@@ -29,18 +30,17 @@ const Courses: React.FC = () => {
                 setSelectedCourseId(+id.valueOf());
                 setIsRemoveDialogVisible(true);
             };
-    const handleDetailsClickOpen = (id: GridRowId) => () => {
-        setSelectedCourseId(+id.valueOf());
+    const handleDetailsClickOpen = (row: any) => () => {
+        setSelectedCourseId((row as Course).id);
         setIsDetailedDialogVisible(true);
     };
-
-    function getAvailableActions(userData: UserData, id: number) {
+    function getAvailableActions(userData: UserData, params: GridRowParams) {
         const actions: any[] = [];
         actions.push(
             <GridActionsCellItem
                 icon={<InfoIcon />}
                 label="Details"
-                onClick={handleDetailsClickOpen(id)}
+                onClick={handleDetailsClickOpen(params.row)}
             />
         )
         if(!!userData.isAdmin) {
@@ -48,12 +48,11 @@ const Courses: React.FC = () => {
             <GridActionsCellItem
                 icon={<DeleteIcon />}
                 label="Delete"
-                onClick={handleRemoveClickOpen(id)}
+                onClick={handleRemoveClickOpen(+params.id.valueOf())}
             />)
         }
         return actions;
-    }
-    
+    }  
     function getColumns(userData: UserData): any[] {
         return [
             {field: 'courseName', headerName: 'Course Name', flex: 150, align: 'center', headerAlign: 'center'},
@@ -63,7 +62,7 @@ const Courses: React.FC = () => {
             {field: 'openDate', headerName: 'Start date', type: 'date', editable: !!userData.isAdmin, flex: 150, align: 'center', headerAlign: 'center'},
             {field: 'actions', headerName: 'Actions', type: 'actions', flex: 100, align: 'center', headerAlign: 'center', 
                 getActions: (params: GridRowParams) => {
-                    return getAvailableActions(userData, +params.id.valueOf());
+                    return getAvailableActions(userData, params);
                 }}
             // {field: 'actions', headerName: 'Actions', type: 'actions'},
             //TODO actions (remove, details, accept updates)
@@ -75,7 +74,6 @@ const Courses: React.FC = () => {
                 data={getCourseData(storeValue.courses.find(course => course.id === selectedCourseId))} />
         )
     }
-
     function getCourseData(course?: Course): {key: string, value: string}[] {
         let res = [];
         if(!!course) {
@@ -102,20 +100,20 @@ const Courses: React.FC = () => {
                 </Paper>
                 <DialogConfirmation
                     isVisible={isRemoveDialogVisible}
-                    isCancelAvailable={true}
                     dialogTitle={'Remove course'}
                     dialogContentText={`Would you like to remove course with ID ${selectedCourseId}?`}
-                    handleAgreeFn={async function () {
-                       await storeValue.removeCourse!(selectedCourseId);
+                    handleCloseFn={async function (isOk: boolean) {
+                       if(isOk) {
+                           await storeValue.removeCourse!(selectedCourseId);
+                       }
                        setIsRemoveDialogVisible(false);
                     } }
                 />
-                <DialogConfirmation
+                <DialogInfo
                     isVisible={isDetailedDialogVisible}
-                    isCancelAvailable={false}
                     dialogTitle={'Course details'}
                     dialogData = {getDialogData()}
-                    handleAgreeFn={async function () {
+                    handleCloseFn={function () {
                        setIsDetailedDialogVisible(false);
                     } }
                 />

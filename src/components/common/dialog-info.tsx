@@ -1,14 +1,15 @@
 import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from '@mui/material';
 import React, { FC } from 'react';
 import { DialogConfirmationProps } from '../../models/common/dialog-data';
+import { DialogInfoProps } from '../../models/common/dialog-info-data';
 
-const DialogConfirmation: FC<DialogConfirmationProps> = (props) => {
-    const {isVisible, dialogTitle, dialogContentText, handleCloseFn} = props;
+const DialogInfo: FC<DialogInfoProps> = (props) => {
+    const {isVisible, dialogTitle, dialogContentText, dialogData, handleCloseFn} = props;
     
     return (
         <Dialog
             open={isVisible}
-            onClose={() => handleCloseFn(false)}
+            onClose={handleCloseFn}
             aria-labelledby="alert-dialog-title"
             aria-describedby="alert-dialog-description"
         >
@@ -18,11 +19,11 @@ const DialogConfirmation: FC<DialogConfirmationProps> = (props) => {
             <DialogContent>
             <DialogContentText id="alert-dialog-description">
                 {dialogContentText}
+                {dialogData}
             </DialogContentText>
             </DialogContent>
             <DialogActions>
-            <Button onClick={() => handleCloseFn(false)}>Cancel</Button>
-            <Button onClick={() => handleCloseFn(true)} autoFocus>
+            <Button onClick={handleCloseFn} autoFocus>
                 OK
             </Button>
             </DialogActions>
@@ -30,4 +31,4 @@ const DialogConfirmation: FC<DialogConfirmationProps> = (props) => {
     );
 };
 
-export default DialogConfirmation;
+export default DialogInfo;
