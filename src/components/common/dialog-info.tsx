@@ -1,6 +1,5 @@
 import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from '@mui/material';
 import React, { FC } from 'react';
-import { DialogConfirmationProps } from '../../models/common/dialog-data';
 import { DialogInfoProps } from '../../models/common/dialog-info-data';
 
 const DialogInfo: FC<DialogInfoProps> = (props) => {
@@ -14,7 +13,7 @@ const DialogInfo: FC<DialogInfoProps> = (props) => {
             aria-describedby="alert-dialog-description"
         >
             <DialogTitle id="alert-dialog-title">
-            {dialogTitle}
+                {dialogTitle}
             </DialogTitle>
             <DialogContent>
             <DialogContentText id="alert-dialog-description">

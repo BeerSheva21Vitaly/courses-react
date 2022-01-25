@@ -13,18 +13,20 @@ const DialogConfirmation: FC<DialogConfirmationProps> = (props) => {
             aria-describedby="alert-dialog-description"
         >
             <DialogTitle id="alert-dialog-title">
-            {dialogTitle}
+                {dialogTitle}
             </DialogTitle>
             <DialogContent>
-            <DialogContentText id="alert-dialog-description">
-                {dialogContentText}
-            </DialogContentText>
+                <DialogContentText id="alert-dialog-description">
+                    {dialogContentText}
+                </DialogContentText>
             </DialogContent>
             <DialogActions>
-            <Button onClick={() => handleCloseFn(false)}>Cancel</Button>
-            <Button onClick={() => handleCloseFn(true)} autoFocus>
-                OK
-            </Button>
+                <Button onClick={() => handleCloseFn(false)}>
+                    Cancel
+                </Button>
+                <Button onClick={() => handleCloseFn(true)} autoFocus>
+                    OK
+                </Button>
             </DialogActions>
         </Dialog>
     );

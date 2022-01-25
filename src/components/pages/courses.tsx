@@ -9,6 +9,8 @@ import { Course } from "../../models/course-type";
 import DialogConfirmation from "../common/dialog-confirmation";
 import Details from "../common/details";
 import DialogInfo from "../common/dialog-info";
+import { useMediaQuery } from "react-responsive";
+import dashboardConfig from "../../config/dashboardConfig.json";
 
 
 function getRows(courses: Course[]): GridRowsProp {
@@ -16,15 +18,19 @@ function getRows(courses: Course[]): GridRowsProp {
 }
 const Courses: React.FC = () => {
     const storeValue = useContext(ColledgeContext);
+    const isMobileLandscape = useMediaQuery({ query: '(min-width: 600px)' });
+    const isLaptop = useMediaQuery({ query: '(min-width: 900px)' });
+    
     const [columns, setColumns] = useState(getColumns(storeValue.userData));
     const [isRemoveDialogVisible, setIsRemoveDialogVisible] = React.useState(false);
     const [isDetailedDialogVisible, setIsDetailedDialogVisible] = React.useState(false);
     const [selectedCourseId, setSelectedCourseId] = useState(0);
-    const rows = useMemo(() => getRows(storeValue.courses), [storeValue.courses])
+    const rows = useMemo(() => getRows(storeValue.courses), [storeValue.courses]);
+
     useEffect(() => {
          setColumns(getColumns(storeValue.userData));
          return () => {};
-    }, [storeValue.userData]);
+    }, [storeValue.userData, isMobileLandscape, isLaptop]);
 
     const handleRemoveClickOpen = (id: GridRowId) => () => {
                 setSelectedCourseId(+id.valueOf());
@@ -54,7 +60,7 @@ const Courses: React.FC = () => {
         return actions;
     }  
     function getColumns(userData: UserData): any[] {
-        return [
+        const allColumns = [
             {field: 'courseName', headerName: 'Course Name', flex: 150, align: 'center', headerAlign: 'center'},
             {field: 'lecturerName', headerName: 'Lecturer', editable: !!userData.isAdmin, flex: 100, align: 'center', headerAlign: 'center'},
             {field: 'hours', headerName: 'Hours', type: 'number', editable: !!userData.isAdmin, align: 'center', headerAlign: 'center'},
@@ -64,9 +70,20 @@ const Courses: React.FC = () => {
                 getActions: (params: GridRowParams) => {
                     return getAvailableActions(userData, params);
                 }}
-            // {field: 'actions', headerName: 'Actions', type: 'actions'},
-            //TODO actions (remove, details, accept updates)
-        ]
+        ];
+        const availableColumns: string[] = getAvailableColumns();
+        return isLaptop ? allColumns : allColumns.filter(column => {
+            return availableColumns.includes(column.field);
+        });
+    }
+    function getAvailableColumns(): string[] {
+        let res: string [];
+        if(isMobileLandscape) {
+            res = dashboardConfig.mobileLandscape;
+        } else {
+            res = dashboardConfig.mobilePortrait;
+        }
+        return res;
     }
     function getDialogData(): ReactNode {
         return (

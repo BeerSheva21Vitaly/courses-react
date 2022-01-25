@@ -1,0 +1,13 @@
+{
+    "mobilePortrait": [
+        "courseName",
+        "openDate",
+        "actions"
+    ],
+    "mobileLandscape": [
+        "courseName",
+        "openDate",
+        "lecturerName",
+        "actions"
+    ]
+}
