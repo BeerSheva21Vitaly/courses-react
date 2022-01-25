@@ -71,12 +71,14 @@ const Courses: React.FC = () => {
                     return getAvailableActions(userData, params);
                 }}
         ];
-        const availableColumns: string[] = getAvailableColumns();
-        return isLaptop ? allColumns : allColumns.filter(column => {
-            return availableColumns.includes(column.field);
-        });
+        if(isLaptop) {
+            return allColumns;       
+        } else {
+            const availableColumnNames: string[] = getAvailableColumnNames();
+            return allColumns.filter(column =>  availableColumnNames.includes(column.field))
+        }        
     }
-    function getAvailableColumns(): string[] {
+    function getAvailableColumnNames(): string[] {
         let res: string [];
         if(isMobileLandscape) {
             res = dashboardConfig.mobileLandscape;
