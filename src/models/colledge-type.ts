@@ -5,6 +5,7 @@ import { Course } from "./course-type";
 export type CoursesType = {
     courses: Course[];
     userData: UserData;
-    addCourse?: (course: Course) => void;
-    removeCourse?: (courseId: number) => void;
+    addCourse: (course: Course) => Promise<Course>;
+    removeCourse: (courseId: number) => Promise<Course>;
+    updateCourse: (courseId: number, newCourse: Course) => Promise<Course>;
 }

@@ -1,9 +1,9 @@
-import { Typography, Box, Button, List, ListItem, IconButton, ListItemText, Paper, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
-import React, { FC, ReactNode, useContext, useEffect, useMemo, useState } from "react";
+import { Box, Paper} from "@mui/material";
+import React, { ReactNode, useContext, useEffect, useMemo, useState } from "react";
 import {ColledgeContext} from "../../store/context";
 import DeleteIcon from '@mui/icons-material/Delete';
 import InfoIcon from '@mui/icons-material/Info';
-import { DataGrid, GridActionsCellItem, GridColDef, GridRowId, GridRowParams, GridRowsProp } from "@mui/x-data-grid";
+import { DataGrid, GridActionsCellItem, GridCellEditCommitParams, GridRowId, GridRowParams, GridRowsProp } from "@mui/x-data-grid";
 import { UserData } from "../../models/common/user-data";
 import { Course } from "../../models/course-type";
 import DialogConfirmation from "../common/dialog-confirmation";
@@ -11,6 +11,7 @@ import Details from "../common/details";
 import DialogInfo from "../common/dialog-info";
 import { useMediaQuery } from "react-responsive";
 import dashboardConfig from "../../config/dashboardConfig.json";
+import courseData from "../../config/courseData.json"
 
 
 function getRows(courses: Course[]): GridRowsProp {
@@ -62,8 +63,13 @@ const Courses: React.FC = () => {
     function getColumns(userData: UserData): any[] {
         const allColumns = [
             {field: 'courseName', headerName: 'Course Name', flex: 150, align: 'center', headerAlign: 'center'},
-            {field: 'lecturerName', headerName: 'Lecturer', editable: !!userData.isAdmin, flex: 100, align: 'center', headerAlign: 'center'},
-            {field: 'hours', headerName: 'Hours', type: 'number', editable: !!userData.isAdmin, align: 'center', headerAlign: 'center'},
+            {field: 'lecturerName', type: 'singleSelect', valueOptions: courseData.lecturers, headerName: 'Lecturer', editable: !!userData.isAdmin, flex: 100, align: 'center', headerAlign: 'center'},
+            {field: 'hours', headerName: 'Hours', type: 'number', editable: !!userData.isAdmin, align: 'center', headerAlign: 'center',
+            preProcessEditCellProps: (params: any) => {
+                const hours = +params.props.value;
+                const hasError = hours < courseData.minHours || hours > courseData.maxHours;
+                return { ...params.props, error: hasError };
+              },},
             {field: 'cost', headerName: 'Cost', type: 'number', editable: !!userData.isAdmin, align: 'center', headerAlign: 'center'},
             {field: 'openDate', headerName: 'Start date', type: 'date', editable: !!userData.isAdmin, flex: 150, align: 'center', headerAlign: 'center'},
             {field: 'actions', headerName: 'Actions', type: 'actions', flex: 100, align: 'center', headerAlign: 'center', 
@@ -102,6 +108,10 @@ const Courses: React.FC = () => {
         }
         return res;
     }
+    function onEdit(params: GridCellEditCommitParams) {
+        console.log(params);
+        //TODO launch confirmation dialog and handle dialog result
+    }
 
     return <Box
                 component="div"
@@ -109,13 +119,18 @@ const Courses: React.FC = () => {
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
+                    '& .Mui-error': {
+                        bgcolor: (theme) =>
+                          `rgb(126,10,15, ${theme.palette.mode === 'dark' ? 0 : 0.1})`,
+                        color: (theme) => (theme.palette.mode === 'dark' ? '#ff4343' : '#750f0f'),
+                      },
                     }}>
                 <Paper
                     sx={{
                         width: '80vw',
                         height: '80vh'
                     }}> 
-                    <DataGrid columns={columns} rows={rows} />
+                    <DataGrid columns={columns} rows={rows} onCellEditCommit={onEdit} />
                 </Paper>
                 <DialogConfirmation
                     isVisible={isRemoveDialogVisible}

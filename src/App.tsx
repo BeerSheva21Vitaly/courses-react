@@ -1,6 +1,6 @@
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { fontSize } from '@mui/system';
-import React, {FC, ReactNode, useContext, useEffect, useState} from 'react';
+import React, {FC, ReactNode, useCallback, useContext, useEffect, useState} from 'react';
 import {BrowserRouter, Routes, Route, Navigate, useLocation} from 'react-router-dom';
 import { Subscription } from 'rxjs';
 import NavigatorResponsive from './components/common/navigator-responsive';
@@ -57,7 +57,6 @@ const App: FC = () => {
 }, [])
 
 const [storeCoursesState, setStore] = React.useState<CoursesType>(initialColledge);
-
  // получение состояния данных курсов
   useEffect(() => {
     console.log("effectCoursesData");
@@ -72,21 +71,11 @@ const [storeCoursesState, setStore] = React.useState<CoursesType>(initialColledg
           }
       })
     } 
-    storeCoursesState.addCourse = addCourse;
-    storeCoursesState.removeCourse = removeCourse;
     const subscription = getData();
     return () => {
       subscription.unsubscribe();
     }
  }, [storeCoursesState.userData])
- 
-  async function addCourse(course: Course) {
-    await colledge.addCourse(course);
-  }
-
-  async function removeCourse(courseId: number) {
-    await colledge.removeCourse(courseId);
-  }
   
   function getRoutes(): ReactNode[] {
     return getRelevantRoutes(storeCoursesState.userData).map(r => <Route path={r.path} element={r.element} key={r.path}/>)
