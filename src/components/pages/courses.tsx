@@ -25,8 +25,10 @@ const Courses: React.FC = () => {
     const [columns, setColumns] = useState(getColumns(storeValue.userData));
     const [isRemoveDialogVisible, setIsRemoveDialogVisible] = React.useState(false);
     const [isDetailedDialogVisible, setIsDetailedDialogVisible] = React.useState(false);
+    const [isEditConfirmDialogVisible, setIsEditConfirmDialogVisible] = React.useState(false);
     const [selectedCourseId, setSelectedCourseId] = useState(0);
-    const rows = useMemo(() => getRows(storeValue.courses), [storeValue.courses]);
+    const [cellEditParams, setCellEditParams] = useState<GridCellEditCommitParams>();
+    const rows = useMemo(() => getRows(storeValue.courses), [storeValue.courses, isEditConfirmDialogVisible]);
 
     useEffect(() => {
          setColumns(getColumns(storeValue.userData));
@@ -62,16 +64,29 @@ const Courses: React.FC = () => {
     }  
     function getColumns(userData: UserData): any[] {
         const allColumns = [
-            {field: 'courseName', headerName: 'Course Name', flex: 150, align: 'center', headerAlign: 'center'},
+            {field: 'courseName', type: 'singleSelect', valueOptions: courseData.courseNames, headerName: 'Course Name', flex: 150, align: 'center', headerAlign: 'center'},
             {field: 'lecturerName', type: 'singleSelect', valueOptions: courseData.lecturers, headerName: 'Lecturer', editable: !!userData.isAdmin, flex: 100, align: 'center', headerAlign: 'center'},
             {field: 'hours', headerName: 'Hours', type: 'number', editable: !!userData.isAdmin, align: 'center', headerAlign: 'center',
-            preProcessEditCellProps: (params: any) => {
-                const hours = +params.props.value;
-                const hasError = hours < courseData.minHours || hours > courseData.maxHours;
-                return { ...params.props, error: hasError };
-              },},
-            {field: 'cost', headerName: 'Cost', type: 'number', editable: !!userData.isAdmin, align: 'center', headerAlign: 'center'},
-            {field: 'openDate', headerName: 'Start date', type: 'date', editable: !!userData.isAdmin, flex: 150, align: 'center', headerAlign: 'center'},
+                preProcessEditCellProps: (params: any) => {
+                    const hours = +params.props.value;
+                    const hasError = hours < courseData.minHours || hours > courseData.maxHours;
+                    return { ...params.props, error: hasError };
+                  },
+            },
+            {field: 'cost', headerName: 'Cost', type: 'number', editable: !!userData.isAdmin, align: 'center', headerAlign: 'center',
+                preProcessEditCellProps: (params: any) => {
+                    const cost = +params.props.value;
+                    const hasError = cost < courseData.minCost || cost > courseData.maxCost;
+                    return { ...params.props, error: hasError };
+                },
+            },
+            {field: 'openDate', headerName: 'Start date', type: 'date', editable: !!userData.isAdmin, flex: 150, align: 'center', headerAlign: 'center',
+                preProcessEditCellProps: (params: any) => {
+                    const year = params.props.value.getFullYear();
+                    const hasError = year < courseData.minYear || year > courseData.maxYear;
+                    return { ...params.props, error: hasError };
+                },
+            },
             {field: 'actions', headerName: 'Actions', type: 'actions', flex: 100, align: 'center', headerAlign: 'center', 
                 getActions: (params: GridRowParams) => {
                     return getAvailableActions(userData, params);
@@ -109,8 +124,28 @@ const Courses: React.FC = () => {
         return res;
     }
     function onEdit(params: GridCellEditCommitParams) {
-        console.log(params);
-        //TODO launch confirmation dialog and handle dialog result
+        setSelectedCourseId(+params.id);
+        setIsEditConfirmDialogVisible(true);
+        setCellEditParams(params);
+    }
+    function getEditConfirmationText(): string {
+                if(selectedCourseId) {
+                    return `Would you like to change ${cellEditParams?.field}
+                            of the course ID ${selectedCourseId} from
+                            ${(storeValue.courses.find(course => course.id === selectedCourseId) as any)[cellEditParams!.field]}
+                            to ${cellEditParams?.value}?`
+                }  else {
+                    return 'No course is selected'
+                }
+    }
+    function getNewCourse(): Course {
+        const oldCourse = storeValue.courses.find!(course => course.id === selectedCourseId);
+        if(oldCourse) {
+            let newCourse: Course = oldCourse;
+            (newCourse as any)[cellEditParams!.field] = cellEditParams!.value;
+            return newCourse;
+        }
+        else throw "Wrong course id";
     }
 
     return <Box
@@ -135,7 +170,7 @@ const Courses: React.FC = () => {
                 <DialogConfirmation
                     isVisible={isRemoveDialogVisible}
                     dialogTitle={'Remove course'}
-                    dialogContentText={`Would you like to remove course with ID ${selectedCourseId}?`}
+                    dialogContentText={`Remove course ID ${selectedCourseId}?`}
                     handleCloseFn={async function (isOk: boolean) {
                        if(isOk) {
                            await storeValue.removeCourse!(selectedCourseId);
@@ -149,6 +184,17 @@ const Courses: React.FC = () => {
                     dialogData = {getDialogData()}
                     handleCloseFn={function () {
                        setIsDetailedDialogVisible(false);
+                    } }
+                />
+                <DialogConfirmation
+                    isVisible={isEditConfirmDialogVisible}
+                    dialogTitle={'Edit course'}
+                    dialogContentText={getEditConfirmationText()}
+                    handleCloseFn={async function (isOk: boolean) {
+                        if(isOk) {
+                            await storeValue.updateCourse!(selectedCourseId, getNewCourse());
+                        }
+                            setIsEditConfirmDialogVisible(false);
                     } }
                 />
         </Box>
