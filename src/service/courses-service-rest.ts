@@ -2,17 +2,25 @@ import { Course } from "../models/course-type";
 import CoursesService from "./courses-service";
 import { from, Observable } from "rxjs";
 import PublisherCourses from "../util/publisher-courses";
+import { pollingInterval } from "../config/servicesConfig";
 
 export const AUTH_TOKEN = "auth_token"
 
-export default class CoursesServiceRest implements CoursesService {
-    private currentCourses: Course[] = [];
-    public publisherCourses: PublisherCourses;
-    constructor(private url: string, private pollingInterval: number) {
-        this.poller();
-        this.publisherCourses = new PublisherCourses(this.currentCourses);
-        setInterval(this.poller.bind(this), this.pollingInterval);
+class CoursesCache {
+    private cacheString: string = '';
+
+    setCache(courses: Course[]): void {
+        this.cacheString = JSON.stringify(courses);
     }
+
+    isEquals(other: Course[]): boolean {
+        return JSON.stringify(other) === this.cacheString;
+    }
+}
+
+export default class CoursesServiceRest implements CoursesService {
+    cache: CoursesCache = new CoursesCache();
+    constructor(private url: string) {}
     
     async add(course: Course): Promise<Course> {
         (course as any).userId = 1;
@@ -24,7 +32,7 @@ export default class CoursesServiceRest implements CoursesService {
                     method: "POST",
                     headers: getHeaders(),
                     body: JSON.stringify(course),          
-                }).then(r=>r.json()).catch(r => console.log(r)) as Promise<Course>  }         
+                }).then(r=>r.json()) as Promise<Course>  }
     }
 
     async remove(id: number): Promise<Course> {
@@ -51,8 +59,23 @@ export default class CoursesServiceRest implements CoursesService {
     }
 
     get(id?: number): Promise<Course> | Observable<Course[]> {
-            return id == undefined ? this.publisherCourses.getCourses() :
-            fetchGet(this.getUrlId(id)) as Promise<Course>;
+        if(id) {
+            return fetchGet(this.getUrlId(id));
+        } else {
+            return new Observable<Course[]>(observer => {
+                const interval = setInterval(() => {              
+                        if (!!localStorage.getItem(AUTH_TOKEN)) {
+                            fetchGet(this.url).then(courses => {
+                                if (!this.cache.isEquals(courses)) {
+                                    this.cache.setCache(courses);
+                                    observer.next(courses);
+                                }
+                        }).catch(err => observer.error(err));
+                        }                 
+                }, pollingInterval);
+                return () => clearInterval(interval);
+            });
+        }
     }
     
     async update(id: number, newCourse: Course): Promise<Course> {
@@ -71,19 +94,6 @@ export default class CoursesServiceRest implements CoursesService {
     getUrlId(id: number): string{
         return `${this.url}/${id}`;
     }
-
-    async poller() {
-        console.log("poller");
-        if(!!localStorage.getItem(AUTH_TOKEN)) {
-            const courses: Course[] = await fetchGet(this.url);
-            if( JSON.stringify(courses) != JSON.stringify(this.currentCourses)) {
-                this.currentCourses = courses;
-                this.publisherCourses.courses = courses;
-                this.publisherCourses.isNext = true;
-            }
-        }
-    }
-
 }
 
 function getHeaders(): { Authorization: string, "Content-Type": string } {
@@ -94,7 +104,8 @@ function getHeaders(): { Authorization: string, "Content-Type": string } {
 }
 
 async function fetchGet(url: string): Promise<any> {
-    return await fetch(url, {
-        headers: getHeaders(),
-    }).then(response => response.json());
+    const response = await fetch(url, {
+        headers: getHeaders()
+    });
+    return await response.json();
 }

@@ -18,6 +18,7 @@ export default class PublisherCourses {
                 } catch (err) {
                     //метод error() publisher'а закрывается publisher и вызывает метд error у subscriber'а
                     subscriber.error(err);
+                    console.log('Call subscriber.error()')
                     clearInterval(interval);
                 }               
             }, publishingInterval)

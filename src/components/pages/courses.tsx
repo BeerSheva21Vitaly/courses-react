@@ -39,10 +39,14 @@ const Courses: React.FC = () => {
                 setSelectedCourseId(+id.valueOf());
                 setIsRemoveDialogVisible(true);
             };
-    const handleDetailsClickOpen = (row: any) => () => {
-        setSelectedCourseId((row as Course).id);
-        setIsDetailedDialogVisible(true);
-    };
+
+    function handleDetailsClickOpen(row: any) {
+        return () => {
+            console.log(storeValue);
+            setSelectedCourseId((row as Course).id);
+            setIsDetailedDialogVisible(true);
+        };
+    }
     function getAvailableActions(userData: UserData, params: GridRowParams) {
         const actions: any[] = [];
         actions.push(
@@ -167,36 +171,36 @@ const Courses: React.FC = () => {
                     }}> 
                     <DataGrid columns={columns} rows={rows} onCellEditCommit={onEdit} />
                 </Paper>
-                <DialogConfirmation
+                {isRemoveDialogVisible && <DialogConfirmation
                     isVisible={isRemoveDialogVisible}
                     dialogTitle={'Remove course'}
                     dialogContentText={`Remove course ID ${selectedCourseId}?`}
                     handleCloseFn={async function (isOk: boolean) {
-                       if(isOk) {
-                           await storeValue.removeCourse!(selectedCourseId);
-                       }
-                       setIsRemoveDialogVisible(false);
-                    } }
-                />
-                <DialogInfo
+                        if (isOk) {
+                            await storeValue.removeCourse!(selectedCourseId);
+                        }
+                        setIsRemoveDialogVisible(false);
+                    }}
+                />}
+                {isDetailedDialogVisible && <DialogInfo
                     isVisible={isDetailedDialogVisible}
                     dialogTitle={'Course details'}
-                    dialogData = {getDialogData()}
+                    dialogData={getDialogData()}
                     handleCloseFn={function () {
-                       setIsDetailedDialogVisible(false);
-                    } }
-                />
-                <DialogConfirmation
+                        setIsDetailedDialogVisible(false);
+                    }}
+                />}
+                {isEditConfirmDialogVisible && <DialogConfirmation
                     isVisible={isEditConfirmDialogVisible}
                     dialogTitle={'Edit course'}
                     dialogContentText={getEditConfirmationText()}
                     handleCloseFn={async function (isOk: boolean) {
-                        if(isOk) {
+                        if (isOk) {
                             await storeValue.updateCourse!(selectedCourseId, getNewCourse());
                         }
-                            setIsEditConfirmDialogVisible(false);
-                    } }
-                />
+                        setIsEditConfirmDialogVisible(false);
+                    }}
+                />}
         </Box>
 }
 

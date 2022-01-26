@@ -63,11 +63,21 @@ const [storeCoursesState, setStore] = React.useState<CoursesType>(initialColledg
     function getData(): Subscription {
         return colledge.getAllCourses().subscribe({
           next(arr) {
+            //TODO
+            // проверять на то, что нет алерта недоступности сервера, а затем получать новые курсы
+            // если все ок, то скидывать флажок алерта в false через setFlagAlert(false)
+
             storeCoursesState.courses = arr;
             setStore({...storeCoursesState});
           },
           error(err: any) {
             console.log(err);
+            
+            //TODO
+            //вывести флаг алерт (через useState) и не делать рендеринг Routes
+            //периодически делать getData() через poling доступности сервера
+            // setTimeout(getData, 2000);
+            //если поток данных пошел, то надо убрать алерт
           }
       })
     } 
@@ -86,6 +96,8 @@ const [storeCoursesState, setStore] = React.useState<CoursesType>(initialColledg
     {/* Конфигурация раутинга  */}
         <BrowserRouter>
           <NavigatorResponsive items={getRelevantRoutes(storeCoursesState.userData)} />
+          {/* TODO условный рендеринг алерта Server unavailable, если нет потока данных  */}
+          {/* TODO условный рендеринг routes, если есть поток данных  */}
           <Routes>
             {getRoutes()}
             {/* Редирект с главной страницы приложения на страницу курсов */}
