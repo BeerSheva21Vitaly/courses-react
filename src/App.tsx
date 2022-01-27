@@ -39,19 +39,25 @@ function getRelevantRoutes(userData: UserData): RouteType[] {
 const App: FC = () => {
   const [storeCoursesState, setStore] = React.useState<CoursesType>(initialColledge);
   const [isServerAvailableFl, setIsServerAvailableFl] = useState(true);
+  const [relevantRoutes, setRelevantRoutes] = useState<RouteType[]>(routes);
+
+  useEffect (()=>{
+    setRelevantRoutes(getRelevantRoutes((storeCoursesState.userData)));
+    }, [storeCoursesState.userData])
 
   useEffect(() => {
       console.log("effectUserData");
       function getUserData(): Subscription {
-      return authService.getUserData().subscribe({
-        next(ud: UserData) {
-          storeCoursesState.userData = ud;
-          setStore({...storeCoursesState});
-        },
-        error(err: any) {
-          console.log(err);
-        }
-      })
+        return authService.getUserData().subscribe({
+          next(ud: UserData) {
+            setIsServerAvailableFl(true);
+            storeCoursesState.userData = ud;
+            setStore({...storeCoursesState});
+          },
+          error(err: any) {
+            console.log(err);
+          }
+        })
     }
       const subscriptionUserData = getUserData();
       return () => {
@@ -69,13 +75,12 @@ const App: FC = () => {
           setIsServerAvailableFl(true);
           storeCoursesState.courses = arr;
           setStore({...storeCoursesState});
-          console.log(`next ${isServerAvailableFl}`)
+          console.log('next');
         },
         error(err: any) {
           console.log(err);
           setIsServerAvailableFl(false);
           setTimeout(() => (subscription = getData()), retryGetDataFromServerInterval)
-          console.log(`error ${isServerAvailableFl}`)
         }
       })
     }
@@ -93,14 +98,17 @@ const App: FC = () => {
       <ThemeProvider theme={theme} >
     {/* Конфигурация раутинга  */}
         <BrowserRouter>
-          <NavigatorResponsive items={getRelevantRoutes(storeCoursesState.userData)} />
+          <NavigatorResponsive items={relevantRoutes} />
           {isServerAvailableFl ?
           <Routes>
             {getRoutes()}
             {/* Редирект с главной страницы приложения на страницу курсов */}
-            <Route path="/"
-                   element={<Navigate
-                       to={!!storeCoursesState.userData.username ? PATH_COURSES : PATH_LOGIN}/>}/>
+            <Route
+                path='*'
+                element={
+                  <Navigate
+                       to={relevantRoutes[0].path}/>}
+            />
           </Routes>
           :
           <Alert severity="error">Server is unavailable!</Alert>}

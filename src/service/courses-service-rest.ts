@@ -2,6 +2,8 @@ import { Course } from "../models/course-type";
 import CoursesService from "./courses-service";
 import { Observable } from "rxjs";
 import { pollingInterval } from "../config/servicesConfig";
+import {ServerErrorType} from "../models/common/server-error-type"
+import {fetchFromRestServer} from "./fetch-rest-handler";
 
 export const AUTH_TOKEN = "auth_token"
 
@@ -26,23 +28,35 @@ export default class CoursesServiceRest implements CoursesService {
         if(await this.exists(course.id)) {
             throw `Course with id ${course.id} already exists`
         } else {
-            return fetch(this.url, 
-                {
-                    method: "POST",
-                    headers: getHeaders(),
-                    body: JSON.stringify(course),          
-                }).then(r=>r.json()) as Promise<Course>  }
+            const response =
+                await fetchFromRestServer(
+                    `${this.url}/login`,
+                    {
+                        method: 'POST',
+                        headers: getHeaders(),
+                        body: JSON.stringify(course),
+                    }
+                )
+            return await response.json();
+        }
     }
 
     async remove(id: number): Promise<Course> {
         const url = this.getUrlId(id);
-        const course = await this.get(id);
-        await fetch(url,
-            {
-                method: "DELETE",
-                headers: getHeaders(),
-            });
-        return course as Course ;
+        try {
+            const course = await this.get(id);
+            const r = await fetch(url,
+                {
+                    method: "DELETE",
+                    headers: getHeaders(),
+                });
+            if(r.status === 401 || r.status === 403) {
+                throw ServerErrorType.userIsNotAuth;
+            }
+        } catch (err) {
+            serverExceptionHandler(ServerErrorType.serverIsNotAvailable);
+        }
+        throw "Can't get there";
     }
 
     async exists(id: number): Promise<boolean> {
@@ -50,9 +64,12 @@ export default class CoursesServiceRest implements CoursesService {
             const response = await fetch(this.getUrlId(id), {
                 headers: getHeaders(),
             });
+            if(response.status === 401 || response.status === 403) {
+                throw ServerErrorType.userIsNotAuth;
+            }
             return response.ok;
         } catch (err) {
-            this.serverExceptionHandler();
+            serverExceptionHandler(ServerErrorType.serverIsNotAvailable);
         }
         return false;
     }
@@ -62,8 +79,7 @@ export default class CoursesServiceRest implements CoursesService {
             return fetchGet(this.getUrlId(id));
         } else {
             return new Observable<Course[]>(observer => {
-                const interval = setInterval(() => {              
-                        console.log(observer);
+                const interval = setInterval(() => {
                         if (!!localStorage.getItem(AUTH_TOKEN)) {
                             fetchGet(this.url)
                                 .then(courses => {
@@ -96,10 +112,7 @@ export default class CoursesServiceRest implements CoursesService {
         });
         return oldCourse as Course;
     }
-    
-    serverExceptionHandler() {
-        throw "Server unavailable. Try later";
-    }
+
     getUrlId(id: number): string{
         return `${this.url}/${id}`;
     }
@@ -117,5 +130,19 @@ async function fetchGet(url: string): Promise<any> {
     const response = await fetch(url, {
         headers: getHeaders()
     });
+    console.log(response);
+    if(response.status === 401 ||response.status === 403) {
+        serverExceptionHandler(ServerErrorType.userIsNotAuth);
+    }
     return await response.json();
+}
+
+function serverExceptionHandler(err: ServerErrorType) {
+    console.log(err);
+    switch (+ServerErrorType) {
+        case ServerErrorType.userIsNotAuth : localStorage.removeItem(AUTH_TOKEN); break;
+        case ServerErrorType.serverIsNotAvailable:
+    }
+    localStorage.removeItem(AUTH_TOKEN);
+    // throw "Server unavailable. Try later";
 }

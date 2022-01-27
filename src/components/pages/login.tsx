@@ -1,4 +1,4 @@
-import { Typography } from "@mui/material";
+import {Alert, Typography} from "@mui/material";
 import React, {Fragment, useState} from "react";
 import { authService } from "../../config/servicesConfig";
 import { LoginData } from "../../models/common/login-data";
@@ -10,15 +10,24 @@ import { PATH_COURSES } from "../../config/routes-сonfig";
 
 
 const Login: React.FC = () => {
+    const [isServerAvailable, setIsServerAvailable] = useState(true);
     async function loginFn(loginData: LoginData): Promise<boolean> {
-        const result = await authService.login(loginData);
-        if(result) {
-            setNavigateFl(true);
+        try {
+            const result = await authService.login(loginData);
+            setIsServerAvailable(true);
+            if (result) {
+                setNavigateFl(true);
+            }
+            return result;
+        } catch (e) {
+            console.log(e);
+            setIsServerAvailable(false);
+            return true;
         }
-        return result;
     }
     const [navigateFl, setNavigateFl] = useState<boolean>(false);
     return <Fragment>
+                {!isServerAvailable && <Alert severity="error">Server is unavailable!</Alert>}
                 <LoginForm 
                     loginFn={loginFn}
                     passwordValidationFn={function (password: string): string {

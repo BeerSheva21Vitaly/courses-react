@@ -121,40 +121,7 @@ const LoginForm: FC<LoginFormProps> = (props) => {
           </Box>
           <Copyright sx={{ mt: 8, mb: 4 }} />
         </Container>
-      </ThemeProvider>      
-        // <Box 
-        //     component ="form"
-        //     onSubmit={onSubmit}
-        //     onReset={() => setLoginData(emptyloginData)}
-        //     sx={{display: "flex", flexDirection: "column", margin: 2}}>
-        //     <Box>
-        //         <TextField
-        //             required
-        //             id="outlined-email-input"
-        //             label="Email"
-        //             type="email"
-        //             autoComplete="current-email"
-        //             onChange={usernameHandler}
-        //         />
-        //         <TextField
-        //             error={!!errorMessage}
-        //             required
-        //             id="outlined-password-input"
-        //             label="Password"
-        //             type="password"
-        //             autoComplete="current-password"
-        //             helperText={errorMessage}
-        //             onChange={passwordHandler}
-        //             sx={{marginLeft: 2}}
-        //         />
-        //     </Box>
-        //     <Box
-        //         sx={{marginTop: 2}}>
-        //         <Button type="submit" disabled ={!flValid} variant="contained">Login</Button>
-        //         <Button type="reset"> Reset</Button>
-        //     </Box>
-            
-        // </Box>
+      </ThemeProvider>
     );
 };
 

@@ -9,6 +9,7 @@ import AuthService from "./auth-service";
 import { AUTH_TOKEN } from "./courses-service-rest";
 import { Buffer } from "buffer";
 import { result } from "lodash";
+import {fetchFromRestServer} from "./fetch-rest-handler";
 
 const pollingInterval: number = 2000;
 
@@ -34,26 +35,29 @@ export default class AuthServiceJwt implements AuthService {
     }
     async login(loginData: LoginData): Promise<boolean> {
         let res = false;
-        const response = await fetch(`${this.url}/login`, {
-            method: 'POST',
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(loginData),
-        });
-        if (response.ok) {
-            const token = await response.json();
-            localStorage.setItem(AUTH_TOKEN, token.accessToken);
-            res = true;
-        }
+        const response =
+                await fetchFromRestServer(
+                    `${this.url}/login`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(loginData),
+                    }
+                )
+            console.log(response)
+            if (response.ok) {
+                const token = await response.json();
+                localStorage.setItem(AUTH_TOKEN, token.accessToken);
+                res = true;
+            }
         return res;
     }
-
     logout(): Promise<boolean> {
         localStorage.removeItem(AUTH_TOKEN);
         return Promise.resolve(true);
     }
-
 }
 
 function fetchUserData(): UserData {
@@ -64,7 +68,6 @@ function fetchUserData(): UserData {
         return tokenToUserData(token as string);
     }
 }
-
 function tokenToUserData(token: string): UserData {
     //payload зранится в 1-м индексе JWT
     let result: UserData = nonAuthorizedUser;
