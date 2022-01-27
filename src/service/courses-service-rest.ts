@@ -1,7 +1,6 @@
 import { Course } from "../models/course-type";
 import CoursesService from "./courses-service";
-import { from, Observable } from "rxjs";
-import PublisherCourses from "../util/publisher-courses";
+import { Observable } from "rxjs";
 import { pollingInterval } from "../config/servicesConfig";
 
 export const AUTH_TOKEN = "auth_token"
@@ -64,16 +63,26 @@ export default class CoursesServiceRest implements CoursesService {
         } else {
             return new Observable<Course[]>(observer => {
                 const interval = setInterval(() => {              
+                        console.log(observer);
                         if (!!localStorage.getItem(AUTH_TOKEN)) {
-                            fetchGet(this.url).then(courses => {
-                                if (!this.cache.isEquals(courses)) {
-                                    this.cache.setCache(courses);
-                                    observer.next(courses);
-                                }
-                        }).catch(err => observer.error(err));
+                            fetchGet(this.url)
+                                .then(courses => {
+                                    if (!this.cache.isEquals(courses)) {
+                                        this.cache.setCache(courses);
+                                        observer.next(courses);
+                                    }
+                                })
+                                .catch(err => {
+                                    this.cache.setCache([]);
+                                    observer.error(err);
+                                    clearInterval(interval);
+                                });
                         }                 
                 }, pollingInterval);
-                return () => clearInterval(interval);
+                return () => {
+                    console.log('clearing interval')
+                    clearInterval(interval)
+                };
             });
         }
     }
@@ -103,6 +112,7 @@ function getHeaders(): { Authorization: string, "Content-Type": string } {
     };
 }
 
+// @ts-ignore
 async function fetchGet(url: string): Promise<any> {
     const response = await fetch(url, {
         headers: getHeaders()

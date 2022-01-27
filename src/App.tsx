@@ -13,8 +13,9 @@ import { Course } from './models/course-type';
 
 import { ColledgeContext, initialColledge} from './store/context';
 import process from "process";
+import { Alert } from '@mui/material';
 
-
+const retryGetDataFromServerInterval = 5000;
 const theme = createTheme();
 // theme.typography.body1 = {
 //   fontSize: "1.2rem",
@@ -36,10 +37,12 @@ function getRelevantRoutes(userData: UserData): RouteType[] {
     || (!userData.username && !r.authenticated && !r.adminOnly)) //попадают route'ы для неавторизованных
 }
 const App: FC = () => {
-  // получение состояния данных авторизации пользователя
+  const [storeCoursesState, setStore] = React.useState<CoursesType>(initialColledge);
+  const [isServerAvailableFl, setIsServerAvailableFl] = useState(true);
+
   useEffect(() => {
-  console.log("effectUserData");
-  function getUserData(): Subscription {
+      console.log("effectUserData");
+      function getUserData(): Subscription {
       return authService.getUserData().subscribe({
         next(ud: UserData) {
           storeCoursesState.userData = ud;
@@ -48,44 +51,39 @@ const App: FC = () => {
         error(err: any) {
           console.log(err);
         }
-    })
-  }
-  const subscriptionUserData = getUserData();
-  return () => {
-    subscriptionUserData.unsubscribe();
-  }
-}, [])
+      })
+    }
+      const subscriptionUserData = getUserData();
+      return () => {
+        subscriptionUserData.unsubscribe();
+      }
+  }, [])
 
-const [storeCoursesState, setStore] = React.useState<CoursesType>(initialColledge);
+
  // получение состояния данных курсов
   useEffect(() => {
     console.log("effectCoursesData");
     function getData(): Subscription {
-        return colledge.getAllCourses().subscribe({
-          next(arr) {
-            //TODO
-            // проверять на то, что нет алерта недоступности сервера, а затем получать новые курсы
-            // если все ок, то скидывать флажок алерта в false через setFlagAlert(false)
-
-            storeCoursesState.courses = arr;
-            setStore({...storeCoursesState});
-          },
-          error(err: any) {
-            console.log(err);
-            
-            //TODO
-            //вывести флаг алерт (через useState) и не делать рендеринг Routes
-            //периодически делать getData() через poling доступности сервера
-            // setTimeout(getData, 2000);
-            //если поток данных пошел, то надо убрать алерт
-          }
+      return colledge.getAllCourses().subscribe({
+        next(arr) {
+          setIsServerAvailableFl(true);
+          storeCoursesState.courses = arr;
+          setStore({...storeCoursesState});
+          console.log(`next ${isServerAvailableFl}`)
+        },
+        error(err: any) {
+          console.log(err);
+          setIsServerAvailableFl(false);
+          setTimeout(() => (subscription = getData()), retryGetDataFromServerInterval)
+          console.log(`error ${isServerAvailableFl}`)
+        }
       })
-    } 
-    const subscription = getData();
+    }
+    let subscription = getData();
     return () => {
       subscription.unsubscribe();
     }
- }, [storeCoursesState.userData])
+ }, [])
   
   function getRoutes(): ReactNode[] {
     return getRelevantRoutes(storeCoursesState.userData).map(r => <Route path={r.path} element={r.element} key={r.path}/>)
@@ -96,15 +94,16 @@ const [storeCoursesState, setStore] = React.useState<CoursesType>(initialColledg
     {/* Конфигурация раутинга  */}
         <BrowserRouter>
           <NavigatorResponsive items={getRelevantRoutes(storeCoursesState.userData)} />
-          {/* TODO условный рендеринг алерта Server unavailable, если нет потока данных  */}
-          {/* TODO условный рендеринг routes, если есть поток данных  */}
+          {isServerAvailableFl ?
           <Routes>
             {getRoutes()}
             {/* Редирект с главной страницы приложения на страницу курсов */}
-            <Route path="/" 
-            element={<Navigate 
-              to={!!storeCoursesState.userData.username ? PATH_COURSES : PATH_LOGIN} />}/>
+            <Route path="/"
+                   element={<Navigate
+                       to={!!storeCoursesState.userData.username ? PATH_COURSES : PATH_LOGIN}/>}/>
           </Routes>
+          :
+          <Alert severity="error">Server is unavailable!</Alert>}
         </BrowserRouter>
       </ThemeProvider>
     </ColledgeContext.Provider> 
