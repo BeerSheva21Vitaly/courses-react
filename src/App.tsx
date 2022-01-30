@@ -9,7 +9,6 @@ import { authService, colledge } from './config/servicesConfig';
 import { CoursesType } from './models/colledge-type';
 import { RouteType } from './models/common/route-type';
 import { UserData } from './models/common/user-data';
-import { Course } from './models/course-type';
 
 import { ColledgeContext, initialColledge} from './store/context';
 import process from "process";
@@ -47,6 +46,7 @@ const App: FC = () => {
 
   useEffect(() => {
       console.log("effectUserData");
+      const subscriptionUserData = getUserData();
       function getUserData(): Subscription {
         return authService.getUserData().subscribe({
           next(ud: UserData) {
@@ -58,8 +58,7 @@ const App: FC = () => {
             console.log(err);
           }
         })
-    }
-      const subscriptionUserData = getUserData();
+      }
       return () => {
         subscriptionUserData.unsubscribe();
       }
@@ -68,8 +67,13 @@ const App: FC = () => {
 
  // получение состояния данных курсов
   useEffect(() => {
+    let subscription: any;
     console.log("effectCoursesData");
+    subscription = getData();
     function getData(): Subscription {
+      if(subscription) {
+        subscription.unsubscribe();
+      }
       return colledge.getAllCourses().subscribe({
         next(arr) {
           setIsServerAvailableFl(true);
@@ -84,7 +88,6 @@ const App: FC = () => {
         }
       })
     }
-    let subscription = getData();
     return () => {
       subscription.unsubscribe();
     }

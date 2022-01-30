@@ -7,8 +7,6 @@ import configData from "../../config/courseData.json"
 import { Navigate } from "react-router-dom";
 import { PATH_COURSES } from "../../config/routes-сonfig";
 
-
-
 const Login: React.FC = () => {
     const [isServerAvailable, setIsServerAvailable] = useState(true);
     async function loginFn(loginData: LoginData): Promise<boolean> {

@@ -68,6 +68,7 @@ export default class CoursesServiceRest implements CoursesService {
                             headers: getHeaders()
                         });
         } else {
+            this.cache= new CoursesCache();
             return new Observable<Course[]>(observer => {
                 const interval = setInterval(async () => {
                         if (!!localStorage.getItem(AUTH_TOKEN)) {
@@ -104,7 +105,7 @@ export default class CoursesServiceRest implements CoursesService {
     
     async update(id: number, newCourse: Course): Promise<Course> {
         const oldCourse = await this.get(id);
-        await fetch(this.getUrlId(id), {
+        await fetchFromRestServer(this.getUrlId(id), {
             method: "PUT",
             headers: getHeaders(),
             body: JSON.stringify(newCourse)
@@ -122,21 +123,4 @@ function getHeaders(): { Authorization: string, "Content-Type": string } {
         Authorization: "Bearer " + localStorage.getItem(AUTH_TOKEN),
         "Content-Type": "application/json"
     };
-}
-
-// @ts-ignore
-async function fetchGet(url: string): Promise<any> {
-    const response = await fetch(url, {
-        headers: getHeaders()
-    });
-    console.log(response);
-    if(response.status === 401 ||response.status === 403) {
-        serverExceptionHandler(ServerErrorType.userIsNotAuth);
-    }
-    return await response.json();
-}
-
-function serverExceptionHandler(err: ServerErrorType) {
-    console.log(err);
-    localStorage.removeItem(AUTH_TOKEN);
 }
