@@ -30,7 +30,7 @@ export default class CoursesServiceRest implements CoursesService {
         } else {
             const response =
                 await fetchFromRestServer(
-                    `${this.url}/login`,
+                    this.url,
                     {
                         method: 'POST',
                         headers: getHeaders(),
@@ -43,56 +43,55 @@ export default class CoursesServiceRest implements CoursesService {
 
     async remove(id: number): Promise<Course> {
         const url = this.getUrlId(id);
-        try {
-            const course = await this.get(id);
-            const r = await fetch(url,
-                {
-                    method: "DELETE",
-                    headers: getHeaders(),
-                });
-            if(r.status === 401 || r.status === 403) {
-                throw ServerErrorType.userIsNotAuth;
-            }
-        } catch (err) {
-            serverExceptionHandler(ServerErrorType.serverIsNotAvailable);
-        }
-        throw "Can't get there";
+        const course = await this.get(id) as Course;
+        const response = await fetchFromRestServer(url,
+            {
+                method: "DELETE",
+                headers: getHeaders(),
+            });
+        return course;
     }
 
     async exists(id: number): Promise<boolean> {
-        try {
-            const response = await fetch(this.getUrlId(id), {
-                headers: getHeaders(),
-            });
-            if(response.status === 401 || response.status === 403) {
-                throw ServerErrorType.userIsNotAuth;
-            }
-            return response.ok;
-        } catch (err) {
-            serverExceptionHandler(ServerErrorType.serverIsNotAvailable);
-        }
-        return false;
+        const response = await fetchFromRestServer(
+            this.getUrlId(id),
+            {headers: getHeaders()}
+        );
+        return response.ok;
     }
 
     get(id?: number): Promise<Course> | Observable<Course[]> {
         if(id) {
-            return fetchGet(this.getUrlId(id));
+            return fetchFromRestServer(
+                        this.getUrlId(id),
+                    {
+                            headers: getHeaders()
+                        });
         } else {
             return new Observable<Course[]>(observer => {
-                const interval = setInterval(() => {
+                const interval = setInterval(async () => {
                         if (!!localStorage.getItem(AUTH_TOKEN)) {
-                            fetchGet(this.url)
-                                .then(courses => {
-                                    if (!this.cache.isEquals(courses)) {
-                                        this.cache.setCache(courses);
-                                        observer.next(courses);
+                            try {
+                                const response = await fetchFromRestServer(
+                                    this.url,
+                                    {
+                                        headers: getHeaders()
                                     }
-                                })
-                                .catch(err => {
+                                )
+                                const courses = await response.json();
+                                if (!this.cache.isEquals(courses)) {
+                                    this.cache.setCache(courses);
+                                    observer.next(courses);
+                                }
+                            } catch (err) {
+                                if(err == ServerErrorType.serverIsNotAvailable) {
                                     this.cache.setCache([]);
                                     observer.error(err);
                                     clearInterval(interval);
-                                });
+                                } else {
+                                    localStorage.removeItem(AUTH_TOKEN);
+                                }
+                            }
                         }                 
                 }, pollingInterval);
                 return () => {
@@ -139,10 +138,5 @@ async function fetchGet(url: string): Promise<any> {
 
 function serverExceptionHandler(err: ServerErrorType) {
     console.log(err);
-    switch (+ServerErrorType) {
-        case ServerErrorType.userIsNotAuth : localStorage.removeItem(AUTH_TOKEN); break;
-        case ServerErrorType.serverIsNotAvailable:
-    }
     localStorage.removeItem(AUTH_TOKEN);
-    // throw "Server unavailable. Try later";
 }
