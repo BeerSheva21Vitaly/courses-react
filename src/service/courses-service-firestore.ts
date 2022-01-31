@@ -1,5 +1,5 @@
 import CoursesService from "./courses-service";
-import firebase, {collection, doc, getDoc, setDoc, deleteDoc} from "firebase/firestore";
+import {collection, doc, getDoc, setDoc, deleteDoc, getFirestore, CollectionReference} from "firebase/firestore";
 import appFire from "../config/fire-config"
 import {Observable} from "rxjs";
 import {collectionData} from "rxfire/firestore";
@@ -7,12 +7,10 @@ import {Course} from "../models/course-type";
 import {getRandomInteger} from "../util/common/random";
 
 export default class CoursesServicesFirestore implements CoursesService {
-    // ссылка на коллекцию - базу данных в FB, в которых хранятся курсы
-    db: firebase.Firestore;
-    fireCollection: firebase.CollectionReference;
+    // ссылка на коллекцию БД, в которой хранятся курсы
+    fireCollection: CollectionReference;
     constructor(private collectionName: string, private minId: number, private maxId: number) {
-        this.db = firebase.getFirestore(appFire);
-        this.fireCollection = collection(this.db, this.collectionName);
+        this.fireCollection = collection(getFirestore(appFire), this.collectionName);
     }
     private async getRandomId(): Promise<number> {
         let id: number;
@@ -20,22 +18,28 @@ export default class CoursesServicesFirestore implements CoursesService {
             id = getRandomInteger(this.minId, this.maxId);
         } while (await this.exists(id))
         return id;
+    };
+    private getCourseDocument(course: Course) {
+        const dateString = course.openDate.toISOString().substring(0,10);
+        const newCourse = {...course, openDate: dateString};
+        return newCourse;
     }
     async add(course: Course): Promise<Course> {
         const id: number = await this.getRandomId();
-        const newCourse = {...course, id};
+        course = {...course, id};
+        const courseDocument = this.getCourseDocument(course);
         const docRef = doc(this.fireCollection, id.toString());
-        await setDoc(docRef, newCourse);
-        return newCourse;
+        await setDoc(docRef, courseDocument);
+        return course;
     }
     async exists(id: number): Promise<boolean> {
-        const docRef = doc(this.db, this.collectionName, id.toString());
+        const docRef = doc(this.fireCollection, id.toString());
         const docSnap = await getDoc((docRef));
         return docSnap.exists();
     }
     get(id?: number): Promise<Course> | Observable<Course[]> {
         if(id) {
-            const docRef = doc(this.db, this.collectionName, id.toString());
+            const docRef = doc(this.fireCollection, id.toString());
             return getDoc((docRef)).then(docSnap => docSnap.data() as Course);
         }
         return collectionData(this.fireCollection) as Observable<Course[]>;
@@ -50,7 +54,7 @@ export default class CoursesServicesFirestore implements CoursesService {
         const docRef = doc(this.fireCollection, id.toString());
         const docSnap = await getDoc((docRef));
         const oldCourse = docSnap.data() as Course;
-        await setDoc(docRef, newCourse);
+        await setDoc(docRef, this.getCourseDocument(newCourse));
         return oldCourse;
     }
 
