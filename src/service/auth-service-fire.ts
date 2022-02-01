@@ -5,21 +5,29 @@ import {nonAuthorizedUser, UserData} from "../models/common/user-data";
 import appFire from "../config/fire-config"
 import { getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import {authState} from "rxfire/auth";
-import {map} from "rxjs/operators";
+import {map, mergeMap} from "rxjs/operators";
+import {collectionData} from "rxfire/firestore";
+import {collection, CollectionReference, getFirestore} from "firebase/firestore";
 
 export default class AuthServiceFire implements AuthService {
     private authFire = getAuth(appFire);
-    constructor(private collectionAdministrators: string) {};
+    private collectionAuth: CollectionReference;
+    constructor(private collectionAdministrators: string) {
+        this.collectionAuth = collection(getFirestore(appFire), this.collectionAdministrators);
+    };
     getUserData(): Observable<UserData> {
         return authState(this.authFire).pipe(
-            map(userFire => (
-                !!userFire ? {
-                        username: userFire.uid,
-                        displayName: userFire.displayName || userFire.email as string,
-                        isAdmin: userFire.uid == "GpWjKAazZLcI1oWiR8A78Mno2x13",
-                    } : nonAuthorizedUser
+            mergeMap(userFire => {
+                return collectionData(this.collectionAuth).pipe(
+                    map(admins => (
+                        !!userFire ? {
+                                    username: userFire.uid,
+                                    displayName: userFire.displayName || userFire.email as string,
+                                    isAdmin: admins.findIndex(doc => doc.email == userFire.email) >= 0
+                                } : nonAuthorizedUser
+                    ))
                 )
-            )
+            })
         )
     }
 
