@@ -13,6 +13,8 @@ import { UserData } from './models/common/user-data';
 import { ColledgeContext, initialColledge} from './store/context';
 import process from "process";
 import { Alert } from '@mui/material';
+import {ServerErrorType} from "./models/common/server-error-type";
+import {AUTH_TOKEN} from "./service/courses-service-rest";
 
 const retryGetDataFromServerInterval = 5000;
 const theme = createTheme();
@@ -83,8 +85,12 @@ const App: FC = () => {
         },
         error(err: any) {
           console.log(err);
-          setIsServerAvailableFl(false);
-          setTimeout(() => (subscription = getData()), retryGetDataFromServerInterval)
+          if(err == ServerErrorType.serverIsNotAvailable) {
+              setIsServerAvailableFl(false);
+              setTimeout(() => (subscription = getData()), retryGetDataFromServerInterval)
+          } else {
+            localStorage.removeItem(AUTH_TOKEN);
+          }
         }
       })
     }

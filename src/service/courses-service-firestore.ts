@@ -1,10 +1,11 @@
 import CoursesService from "./courses-service";
-import {collection, doc, getDoc, setDoc, deleteDoc, getFirestore, CollectionReference} from "firebase/firestore";
+import {collection, CollectionReference, deleteDoc, doc, getDoc, getFirestore, setDoc} from "firebase/firestore";
 import appFire from "../config/fire-config"
-import {Observable} from "rxjs";
+import {catchError, Observable} from "rxjs";
 import {collectionData} from "rxfire/firestore";
 import {Course} from "../models/course-type";
 import {getRandomInteger} from "../util/common/random";
+import {ServerErrorType} from "../models/common/server-error-type";
 
 export default class CoursesServicesFirestore implements CoursesService {
     // ссылка на коллекцию БД, в которой хранятся курсы
@@ -20,7 +21,7 @@ export default class CoursesServicesFirestore implements CoursesService {
         return id;
     };
     private getCourseDocument(course: Course) {
-        const dateString = course.openDate.toISOString().substring(0,10);
+        const dateString = course.openDate.toISOString();
         const newCourse = {...course, openDate: dateString};
         return newCourse;
     }
@@ -29,7 +30,11 @@ export default class CoursesServicesFirestore implements CoursesService {
         course = {...course, id};
         const courseDocument = this.getCourseDocument(course);
         const docRef = doc(this.fireCollection, id.toString());
-        await setDoc(docRef, courseDocument);
+        try {
+            await setDoc(docRef, courseDocument);
+        } catch (e) {
+            throw ServerErrorType.userIsNotAuth;
+        }
         return course;
     }
     async exists(id: number): Promise<boolean> {
@@ -42,19 +47,34 @@ export default class CoursesServicesFirestore implements CoursesService {
             const docRef = doc(this.fireCollection, id.toString());
             return getDoc((docRef)).then(docSnap => docSnap.data() as Course);
         }
-        return collectionData(this.fireCollection) as Observable<Course[]>;
+        return (collectionData(this.fireCollection) as Observable<Course[]>).pipe(
+            catchError(err => {
+                console.log(err);
+                throw err.code ?  ServerErrorType.userIsNotAuth
+                    : ServerErrorType.serverIsNotAvailable;
+
+            })
+        );
     }
     async remove(id: number): Promise<Course> {
         const oldCourse = await this.get(id) as Course;
         const docRef = doc(this.fireCollection, id.toString());
-        await deleteDoc(docRef);
+        try {
+            await deleteDoc(docRef);
+        } catch (e) {
+            throw ServerErrorType.userIsNotAuth;
+        }
         return oldCourse;
     }
     async update(id: number, newCourse: Course): Promise<Course> {
         const docRef = doc(this.fireCollection, id.toString());
         const docSnap = await getDoc((docRef));
         const oldCourse = docSnap.data() as Course;
-        await setDoc(docRef, this.getCourseDocument(newCourse));
+        try {
+            await setDoc(docRef, this.getCourseDocument(newCourse));
+        } catch (e) {
+            throw ServerErrorType.userIsNotAuth;
+        }
         return oldCourse;
     }
 
