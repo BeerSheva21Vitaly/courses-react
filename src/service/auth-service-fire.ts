@@ -23,7 +23,7 @@ export default class AuthServiceFire implements AuthService {
                         !!userFire ? {
                                     username: userFire.uid,
                                     displayName: userFire.displayName || userFire.email as string,
-                                    isAdmin: admins.findIndex(doc => doc.email == userFire.email) >= 0
+                                    isAdmin: admins.findIndex(doc => doc.id == userFire.uid) >= 0
                                 } : nonAuthorizedUser
                     ))
                 )
