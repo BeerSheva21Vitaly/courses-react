@@ -6,6 +6,7 @@ import LoginForm from "../common/login-form";
 import configData from "../../config/courseData.json"
 import { Navigate } from "react-router-dom";
 import { PATH_COURSES } from "../../config/routes-сonfig";
+import {oauthProviders} from "../../config/servicesConfig";
 
 const Login: React.FC = () => {
     const [isServerAvailable, setIsServerAvailable] = useState(true);
@@ -31,7 +32,8 @@ const Login: React.FC = () => {
                     passwordValidationFn={function (password: string): string {
                         return password.length < configData.passwordLength ? 
                     `Pasword must be greater or equual then ${configData.passwordLength} characters` : "";        
-                    }} />
+                    }}
+                    oauthProviders={oauthProviders}/>
                 {navigateFl && <Navigate to={PATH_COURSES}></Navigate>}
             </Fragment>
 }

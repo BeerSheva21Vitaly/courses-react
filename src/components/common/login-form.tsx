@@ -3,19 +3,19 @@ import React, {FC, useState, useEffect} from "react";
 import { LoginData } from "../../models/common/login-data";
 import Avatar from '@mui/material/Avatar';
 import CssBaseline from '@mui/material/CssBaseline';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
 import Link from '@mui/material/Link';
-import Grid from '@mui/material/Grid';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import {OAuthProvider} from "../../models/common/oauth-provider-type";
+
 
 type LoginFormProps = {
     loginFn: (loginData: LoginData) => Promise<boolean>;
     //если все ок, то passwordValidationFn будет возвращать пустую строку. Если не ок, то текст ошибки
     passwordValidationFn: (password: string) => string;
+    oauthProviders: OAuthProvider[];
 }
 const emptyloginData: LoginData = {
     email: "",
@@ -36,7 +36,7 @@ function Copyright(props: any) {
 const theme = createTheme();
 
 const LoginForm: FC<LoginFormProps> = (props) => {
-    const {loginFn, passwordValidationFn} = props;
+    const {loginFn, passwordValidationFn, oauthProviders} = props;
     const [loginData, setLoginData] = useState<LoginData>(emptyloginData);
     const [errorMessage, setErrorMessage] = useState<string>("");
     const [flValid, setFlValid] = useState<boolean>(false);
@@ -54,6 +54,7 @@ const LoginForm: FC<LoginFormProps> = (props) => {
             // alert("Login successfully")
         }
     }
+
     function usernameHandler(event: any) {
         loginData.email = event.target.value;
         setLoginData({...loginData});
@@ -64,6 +65,41 @@ const LoginForm: FC<LoginFormProps> = (props) => {
         setErrorMessage(message);
         loginData.password = enteredPassword;
         setLoginData({...loginData});
+    }
+
+    async function oauthProvidersHandler(name: string, event: any) {
+        loginData.email = name;
+        loginData.password = "";
+        setLoginData({...loginData})
+        await onSubmit(event);
+    }
+
+    function getOAuthProviders(): React.ReactNode[] {
+        return oauthProviders.map(provider => {
+            return <Button
+                        key={provider.name}
+                        sx={{
+                            p: 1,
+                            m: 1,
+                        }}
+                        variant="outlined"
+                        onClick={(event) => oauthProvidersHandler(provider.name, event)}
+                    >
+                <img
+                    src={`${provider.iconLink}`}
+                    width={'30px'}
+                    height={'30px'}
+                />
+                <Typography
+                    sx={{
+                        marginLeft: 1,
+                    }}
+                >
+                    {provider.name}
+                </Typography>
+
+            </Button>
+        })
     }
 
     return (
@@ -117,7 +153,22 @@ const LoginForm: FC<LoginFormProps> = (props) => {
               >
                 Sign In
               </Button>
+                <Box
+                    sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                }}>
+                    <Typography>or login with </Typography>
+                </Box>
+                <Box sx={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                }}>
+                    {getOAuthProviders()}
+                </Box>
             </Box>
+
           </Box>
           <Copyright sx={{ mt: 8, mb: 4 }} />
         </Container>
